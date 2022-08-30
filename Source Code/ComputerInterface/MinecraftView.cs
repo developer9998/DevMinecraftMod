@@ -97,7 +97,8 @@ namespace DevMinecraftMod.CI
                 .AppendLines(1);
 
                 str.BeginCenter()
-                .Append($"<color={"#" + selectionColour}>Update the screen with Option 1</color>")
+                .AppendLine($"<color={"#" + selectionColour}>Update the screen with Option 1</color>")
+                .AppendLine($"<color={"#" + selectionColour}>{(Plugin.Instance.stainedGlass ? "Stained Glass Enabled" : "")}</color>")
                 .EndAlign();
 
             });
@@ -123,6 +124,10 @@ namespace DevMinecraftMod.CI
                     ReturnToMainMenu();
                     break;
                 case EKeyboardKey.Option1:
+                    UpdateScreen();
+                    break;
+                case EKeyboardKey.Option2:
+                    Plugin.Instance.stainedGlass = !Plugin.Instance.stainedGlass;
                     UpdateScreen();
                     break;
             }

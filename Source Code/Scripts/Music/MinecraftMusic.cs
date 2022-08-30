@@ -11,13 +11,13 @@ namespace DevMinecraftMod.Music
     {
         public static MinecraftMusic Instance;
 
-        public GameObject buttonObject;
+        private GameObject buttonObject;
 
         private Material buttonUnpressed;
         private Material buttonPressed;
 
         private GameObject buttonTextObject;
-        public Text buttonText;
+        private Text buttonText;
 
         public bool isActivated = false;
 

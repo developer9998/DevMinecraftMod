@@ -12,7 +12,8 @@ namespace DevMinecraftMod
 {
     [ModdedGamemode]
     [Description("HauntedModMenu")]
-    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
+    [BepInDependency("tonimacaroni.computerinterface", "1.5.2")]
+    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.5")]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
@@ -30,6 +31,8 @@ namespace DevMinecraftMod
         public bool lIndicatorEnabled = false;
         public float musicVolume = 0.05f;
 
+        public bool stainedGlass;
+
         private void GetSettings()
         {
             int sIndicatorEnabledInt = PlayerPrefs.GetInt("isSIndicatorEnabledMinecraft0", 1);
@@ -42,12 +45,8 @@ namespace DevMinecraftMod
 
         public void SetSettings()
         {
-
-            int temp2 = sIndicatorEnabled ? 1 : 0;
-            int temp3 = lIndicatorEnabled ? 1 : 0;
-
-            PlayerPrefs.SetInt("isSIndicatorEnabledMinecraft0", temp2);
-            PlayerPrefs.SetInt("isLIndicatorEnabledMinecraft0", temp3);
+            PlayerPrefs.SetInt("isSIndicatorEnabledMinecraft0", sIndicatorEnabled ? 1 : 0);
+            PlayerPrefs.SetInt("isLIndicatorEnabledMinecraft0", lIndicatorEnabled ? 1 : 0);
             PlayerPrefs.SetFloat("isMusicVolumeMinecraft0", musicVolume);
 
             PlayerPrefs.Save();
