@@ -7,6 +7,8 @@ using UnityEngine.XR;
 using HarmonyLib;
 using Photon.Pun;
 using GorillaLocomotion;
+using DevMinecraftMod.RPC;
+using Utilla;
 
 // programmed by dev.
 // updated material data by frogrilla, thank you :)
@@ -15,11 +17,9 @@ namespace DevMinecraftMod.Base
 {
     public class MinecraftFunction : MonoBehaviour
     {
+
         public static MinecraftFunction Instance;
-
-        private Harmony harmony;
-
-        private AssetBundle blockBundle;
+        public MinecraftEvents mce;
 
         private GameObject objectStorage;
         private GameObject objectStorageBlock;
@@ -30,42 +30,24 @@ namespace DevMinecraftMod.Base
         private GameObject itemShow;
 
         private Text itemText;
-
         private LineRenderer ln;
+        private Harmony harmony;
+        private AssetBundle blockBundle;
 
         private bool triggerPullled = true;
         private bool gripPulled = true;
         private bool upPulled = true;
         private bool downPulled = true;
-
         private bool raycastExists = false;
+
+        public int mode = 0;
+        public int modeVersion = 0;
+        public int currentBlock = 0;
+        private readonly int maxBlocks = 17;
 
         public List<GameObject> minecraftBlocks = new List<GameObject>();
         private readonly List<GameObject> minecraftBlockList = new List<GameObject>();
         private readonly List<string> minecraftBlockListString = new List<string>();
-
-        public int mode = 0;
-        public int modeVersion = 0;
-
-        public int currentBlock = 0;
-        private readonly int maxBlocks = 17;
-
-        Color GetColour(float max)
-        {
-            float r = Mathf.Clamp(PlayerPrefs.GetFloat("redValue"), 0, max);
-            float g = Mathf.Clamp(PlayerPrefs.GetFloat("greenValue"), 0, max);
-            float b = Mathf.Clamp(PlayerPrefs.GetFloat("blueValue"), 0, max);
-            return new Color(r, g, b, 1);
-        }
-
-        void AddBlock(AssetBundle bund, string blockName)
-        {
-            GameObject objec = bund.LoadAsset<GameObject>(blockName);
-            minecraftBlockList.Add(objec);
-
-            string blockNameFinal = blockName.Replace("CraftingTable", "Crafting Table").Replace("IronOre", "Iron Ore").Replace("GoldOre", "Gold Ore").Replace("PackedIce", "Packed Ice").Replace("Plank", "Oak Planks").Replace("Log", "Oak Log").Replace("Obisdian", "Obsidian").Replace("Leaves", "Oak Leaves").Replace("Brick", "Bricks").Replace("Glass", $"{(Plugin.Instance.stainedGlass ? "Stained Glass" : "Glass")}");
-            minecraftBlockListString.Add(blockNameFinal);
-        }
         
         void Start()
         {
@@ -80,27 +62,29 @@ namespace DevMinecraftMod.Base
                 harmony.PatchAll();
             }
 
-            // Page 1
-            AddBlock(blockBundle, "Grass"); // 0
-            AddBlock(blockBundle, "Dirt"); // 1 
-            AddBlock(blockBundle, "Log"); // 2
-            AddBlock(blockBundle, "Plank"); // 3 
-            AddBlock(blockBundle, "Cobblestone"); // 4
-            AddBlock(blockBundle, "Brick"); // 5
-            AddBlock(blockBundle, "Stone"); // 6
-            AddBlock(blockBundle, "Wool"); // 7 
-            AddBlock(blockBundle, "Leaves"); // 8
+            string[] blockNames =
+            {
+                "Grass", // 0
+                "Dirt", // 1
+                "Log", // 2
+                "Plank", // 3
+                "Cobblestone", // 4
+                "Brick", // 5
+                "Stone", // 6
+                "Wool", // 7
+                "Leaves", // 8
+                "Glass", // 9
+                "CraftingTable", // 10
+                "Furnace", // 11
+                "IronOre", // 12
+                "GoldOre", // 13
+                "Netherrack", // 14
+                "PackedIce", // 15
+                "Obisdian", // 16
+                "Bookshelf" // 17
+            }; // 18 total blocks
 
-            // Page 2
-            AddBlock(blockBundle, "Glass"); // 9
-            AddBlock(blockBundle, "CraftingTable"); // 10
-            AddBlock(blockBundle, "Furnace"); // 11
-            AddBlock(blockBundle, "IronOre"); // 12
-            AddBlock(blockBundle, "GoldOre"); // 13
-            AddBlock(blockBundle, "Netherrack"); // 14
-            AddBlock(blockBundle, "PackedIce"); // 15
-            AddBlock(blockBundle, "Obisdian"); // 16
-            AddBlock(blockBundle, "Bookshelf"); // 17
+            AddBlocks(blockBundle, blockNames);
 
             objectStorage = new GameObject();
 
@@ -189,284 +173,6 @@ namespace DevMinecraftMod.Base
             ln = lnObject.GetComponent<LineRenderer>();
             ln.enabled = false;
 
-        }
-
-        void SetSlot(int slot)
-        {
-            Transform selections = itemIndicator.transform.Find("ItemSelections");
-
-            for (int i = 0; i < selections.childCount; i++)
-            {
-                selections.GetChild(i).GetComponent<Renderer>().enabled = false;
-                if (i == slot)
-                    selections.GetChild(i).GetComponent<Renderer>().enabled = true;
-            }
-
-            UpdateAssets();
-        }
-
-        void PlaySpawnBlockAudio(Blocks block, Vector3 blockPosition)
-        {
-            GameObject soundObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("SoundExample"));
-            soundObjectTemp.transform.position = blockPosition;
-            AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
-
-            switch (block)
-            {
-                case Blocks.Grass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Dirt:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.OakLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.OakPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Cobblestone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Brick:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Stone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Wool:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.OakLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Glass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassPlace{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.CraftingTable:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Furnace:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.IronOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.GoldOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Netherrack:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.PackedIce:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"IcePlace{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Obsidian:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Bookshelf:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
-                    break;
-            }
-
-            audioSourceTemp.transform.SetParent(objectStorage.transform, false);
-            audioSourceTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 3;
-        }
-
-        void DestroyBlock(Blocks block, Vector3 blockPosition, Color blockColour)
-        {
-            GameObject soundObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("SoundExample"));
-            soundObjectTemp.transform.position = blockPosition;
-            AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
-
-            switch (block)
-            {
-                case Blocks.Grass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Dirt:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.OakLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.OakPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Cobblestone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Brick:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Stone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Wool:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.OakLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Glass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f);
-                    break;
-                case Blocks.CraftingTable:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Furnace:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.IronOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.GoldOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Netherrack:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.PackedIce:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f);
-                    break;
-                case Blocks.Obsidian:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
-                    break;
-                case Blocks.Bookshelf:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
-                    break;
-            }
-
-            audioSourceTemp.transform.SetParent(objectStorage.transform, false);
-            audioSourceTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 3;
-
-            GameObject particleObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("BlockParticle"));
-            particleObjectTemp.transform.position = blockPosition - new Vector3(0, 0.15f, 0);
-
-            ParticleSystem ps = particleObjectTemp.GetComponent<ParticleSystem>(); // play station
-            ParticleSystemRenderer psr = ps.GetComponent<ParticleSystemRenderer>();
-
-            switch (block)
-            {
-                case Blocks.Grass:
-                    psr.material = blockBundle.LoadAsset<Material>("dirt");
-                    break;
-                case Blocks.Dirt:
-                    psr.material = blockBundle.LoadAsset<Material>("dirt");
-                    break;
-                case Blocks.OakLog:
-                    psr.material = blockBundle.LoadAsset<Material>("log");
-                    break;
-                case Blocks.OakPlanks:
-                    psr.material = blockBundle.LoadAsset<Material>("plank");
-                    break;
-                case Blocks.Cobblestone:
-                    psr.material = blockBundle.LoadAsset<Material>("cobblestone");
-                    break;
-                case Blocks.Brick:
-                    psr.material = blockBundle.LoadAsset<Material>("brick");
-                    break;
-                case Blocks.Stone:
-                    psr.material = blockBundle.LoadAsset<Material>("stone");
-                    break;
-                case Blocks.Wool:
-                    psr.material = blockBundle.LoadAsset<Material>("wool");
-                    break;
-                case Blocks.OakLeaves:
-                    psr.material = blockBundle.LoadAsset<Material>("leaves");
-                    break;
-                case Blocks.Glass:
-                    if (Plugin.Instance.stainedGlass)
-                        psr.material = blockBundle.LoadAsset<Material>("stainGlass");
-                    else
-                        psr.material = blockBundle.LoadAsset<Material>("glass");
-                    break;
-                case Blocks.CraftingTable:
-                    psr.material = blockBundle.LoadAsset<Material>("craft1");
-                    break;
-                case Blocks.Furnace:
-                    psr.material = blockBundle.LoadAsset<Material>("furn2");
-                    break;
-                case Blocks.IronOre:
-                    psr.material = blockBundle.LoadAsset<Material>("ironore");
-                    break;
-                case Blocks.GoldOre:
-                    psr.material = blockBundle.LoadAsset<Material>("goldore");
-                    break;
-                case Blocks.Netherrack:
-                    psr.material = blockBundle.LoadAsset<Material>("netherrack");
-                    break;
-                case Blocks.PackedIce:
-                    psr.material = blockBundle.LoadAsset<Material>("packed");
-                    break;
-                case Blocks.Obsidian:
-                    psr.material = blockBundle.LoadAsset<Material>("obsidian");
-                    break;
-                case Blocks.Bookshelf:
-                    psr.material = blockBundle.LoadAsset<Material>("bookshelf");
-                    break;
-            }
-
-            psr.material.mainTextureScale = new Vector2(0.2f, 0.2f);
-            if (block == Blocks.Wool)
-            {
-                psr.material.color = blockColour;
-            }
-
-            psr.material.mainTextureOffset = new Vector2(0.5f * Random.Range(0, 2), 0.5f * Random.Range(0, 2));
-
-            ps.Play();
-
-            particleObjectTemp.transform.SetParent(objectStorage.transform, false);
-            particleObjectTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 2;
-        }
-
-        void UpdateAssets()
-        {
-            if (currentBlock != 9)
-                itemText.text = minecraftBlockListString[currentBlock];
-            else
-            {
-                if (Plugin.Instance.stainedGlass)
-                {
-                    itemText.text = "Stained Glass";
-                }
-                else
-                {
-                    itemText.text = minecraftBlockListString[currentBlock];
-                }
-            }
-
-            Transform ISTransform = itemShow.transform;
-
-            if (ISTransform.childCount != 0)
-            {
-                if (ISTransform.childCount >= 1)
-                    for (int i = 0; i < ISTransform.childCount; i++)
-                        Destroy(ISTransform.GetChild(i).gameObject);
-                else
-                    Destroy(ISTransform.GetChild(0).gameObject);
-            }
-
-            GameObject tempBlock = Instantiate(minecraftBlockList[currentBlock]);
-            tempBlock.transform.SetParent(itemShow.transform, false);
-
-            tempBlock.transform.localScale = Vector3.one;
-            tempBlock.transform.localPosition = Vector3.zero;
-            tempBlock.transform.localRotation = Quaternion.identity;
-
-            BoxCollider[] boxColliders = tempBlock.transform.GetComponentsInChildren<BoxCollider>();
-
-            foreach (BoxCollider bx in boxColliders)
-                bx.enabled = false;
-
-            if (currentBlock == 7)
-            {
-                Renderer[] renderers = tempBlock.transform.GetComponentsInChildren<Renderer>();
-
-                foreach (Renderer renderer in renderers)
-                    renderer.material.color = GetColour(0.9f);
-            }
         }
 
         void Update()
@@ -641,14 +347,12 @@ namespace DevMinecraftMod.Base
             {
                 if (minecraftBlocks.Count != 0)
                 {
-                    for (int i = 0; i < minecraftBlocks.Count; i++)
+                    foreach (GameObject Tblock in minecraftBlocks)
                     {
-                        GameObject tempOb = minecraftBlocks[i];
+                        DestroyBlock(Tblock.transform.Find("Collider/Front").GetComponent<MinecraftBlockLink>().block, Tblock.transform.Find("Collider/Front").GetComponent<MinecraftBlockLink>().minecraftObject.transform.position, Tblock.transform.Find("Collider/Front").GetComponent<MinecraftBlockLink>().blockColour);
 
-                        DestroyBlock(tempOb.transform.Find("Collider/Front").GetComponent<MinecraftBlockLink>().block, tempOb.transform.Find("Collider/Front").GetComponent<MinecraftBlockLink>().minecraftObject.transform.position, tempOb.transform.Find("Collider/Front").GetComponent<MinecraftBlockLink>().blockColour);
-
-                        minecraftBlocks.Remove(tempOb);
-                        Destroy(tempOb);
+                        minecraftBlocks.Remove(Tblock);
+                        Destroy(Tblock);
                     }
                 }
             }
@@ -684,6 +388,13 @@ namespace DevMinecraftMod.Base
                         case 0:
 
                             GameObject tempBlock = Instantiate(minecraftBlockList[currentBlock]);
+
+                            minecraftBlocks.Add(tempBlock);
+
+                            if (!minecraftBlocks.Contains(tempBlock))
+                            {
+                                minecraftBlocks.Add(tempBlock);
+                            }
 
                             tempBlock.transform.SetParent(objectStorageBlock.transform, false);
                             tempBlock.name = minecraftBlockList[currentBlock].name;
@@ -897,7 +608,6 @@ namespace DevMinecraftMod.Base
                                     break;
                             }
 
-
                             BoxCollider[] boxColliders = tempBlock.transform.GetComponentsInChildren<BoxCollider>();
 
                             foreach (BoxCollider bx in boxColliders)
@@ -914,8 +624,6 @@ namespace DevMinecraftMod.Base
 
                                 bx.gameObject.GetComponent<MinecraftBlockLink>().block = usedBlockEnum;
                             }
-
-                            minecraftBlocks.Add(tempBlock);
 
                             PlaySpawnBlockAudio(usedBlockEnum, tempBlock.transform.position);
 
@@ -934,6 +642,11 @@ namespace DevMinecraftMod.Base
                                     DestroyBlock(hit.transform.GetComponent<MinecraftBlockLink>().block, hit.transform.GetComponent<MinecraftBlockLink>().minecraftObject.transform.position, hit.transform.GetComponent<MinecraftBlockLink>().blockColour);
                                     minecraftBlocks.Remove(hit.transform.GetComponent<MinecraftBlockLink>().minecraftObject);
                                     Destroy(hit.transform.GetComponent<MinecraftBlockLink>().minecraftObject);
+
+                                    if (minecraftBlocks.Contains(hit.transform.GetComponent<MinecraftBlockLink>().minecraftObject))
+                                    {
+                                        minecraftBlocks.Remove(hit.transform.GetComponent<MinecraftBlockLink>().minecraftObject);
+                                    }
                                 }
                             }
                             break;
@@ -960,6 +673,327 @@ namespace DevMinecraftMod.Base
             else if (!gripDown && gripPulled)
                 gripPulled = false;
         }
+
+        Color GetColour(float max)
+        {
+            float r = Mathf.Clamp(PlayerPrefs.GetFloat("redValue"), 0, max);
+            float g = Mathf.Clamp(PlayerPrefs.GetFloat("greenValue"), 0, max);
+            float b = Mathf.Clamp(PlayerPrefs.GetFloat("blueValue"), 0, max);
+            return new Color(r, g, b, 1);
+        }
+
+        void AddBlocks(AssetBundle bundle, string[] blockNames)
+        {
+            foreach (string blockName in blockNames)
+            {
+                GameObject objec = bundle.LoadAsset<GameObject>(blockName);
+                minecraftBlockList.Add(objec);
+
+                string blockNameFinal = blockName
+                    .Replace("CraftingTable", "Crafting Table")
+                    .Replace("IronOre", "Iron Ore")
+                    .Replace("GoldOre", "Gold Ore")
+                    .Replace("PackedIce", "Packed Ice")
+                    .Replace("Plank", "Oak Planks")
+                    .Replace("Log", "Oak Log")
+                    .Replace("Obisdian", "Obsidian")
+                    .Replace("Leaves", "Oak Leaves")
+                    .Replace("Brick", "Bricks");
+
+                minecraftBlockListString.Add(blockNameFinal);
+            }
+        }
+
+        void SetSlot(int slot)
+        {
+            Transform selections = itemIndicator.transform.Find("ItemSelections");
+
+            for (int i = 0; i < selections.childCount; i++)
+            {
+                selections.GetChild(i).GetComponent<Renderer>().enabled = false;
+                if (i == slot)
+                    selections.GetChild(i).GetComponent<Renderer>().enabled = true;
+            }
+
+            UpdateAssets();
+        }
+
+        void PlaySpawnBlockAudio(Blocks block, Vector3 blockPosition)
+        {
+            GameObject soundObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("SoundExample"));
+            soundObjectTemp.transform.position = blockPosition;
+            AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
+
+            switch (block)
+            {
+                case Blocks.Grass:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Dirt:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakLog:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakPlanks:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Cobblestone:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Brick:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Stone:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Wool:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakLeaves:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Glass:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassPlace{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.CraftingTable:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Furnace:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.IronOre:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.GoldOre:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Netherrack:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.PackedIce:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"IcePlace{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Obsidian:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Bookshelf:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+            }
+
+            audioSourceTemp.transform.SetParent(objectStorage.transform, false);
+            audioSourceTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 3;
+
+            mce.TriggerBlockPlace(new MinecraftEvents.BlockArgs
+            {
+                block = block,
+                blockPosition = blockPosition
+            });
+        }
+
+        void DestroyBlock(Blocks block, Vector3 blockPosition, Color blockColour)
+        {
+            GameObject soundObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("SoundExample"));
+            soundObjectTemp.transform.position = blockPosition;
+            AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
+
+            switch (block)
+            {
+                case Blocks.Grass:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Dirt:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakLog:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakPlanks:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Cobblestone:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Brick:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Stone:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Wool:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakLeaves:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Glass:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f);
+                    break;
+                case Blocks.CraftingTable:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Furnace:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.IronOre:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.GoldOre:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Netherrack:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.PackedIce:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f);
+                    break;
+                case Blocks.Obsidian:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Bookshelf:
+                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+            }
+
+            audioSourceTemp.transform.SetParent(objectStorage.transform, false);
+            audioSourceTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 3;
+
+            GameObject particleObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("BlockParticle"));
+            particleObjectTemp.transform.position = blockPosition - new Vector3(0, 0.15f, 0);
+
+            ParticleSystem ps = particleObjectTemp.GetComponent<ParticleSystem>(); // play station
+            ParticleSystemRenderer psr = ps.GetComponent<ParticleSystemRenderer>();
+
+            switch (block)
+            {
+                case Blocks.Grass:
+                    psr.material = blockBundle.LoadAsset<Material>("dirt");
+                    break;
+                case Blocks.Dirt:
+                    psr.material = blockBundle.LoadAsset<Material>("dirt");
+                    break;
+                case Blocks.OakLog:
+                    psr.material = blockBundle.LoadAsset<Material>("log");
+                    break;
+                case Blocks.OakPlanks:
+                    psr.material = blockBundle.LoadAsset<Material>("plank");
+                    break;
+                case Blocks.Cobblestone:
+                    psr.material = blockBundle.LoadAsset<Material>("cobblestone");
+                    break;
+                case Blocks.Brick:
+                    psr.material = blockBundle.LoadAsset<Material>("brick");
+                    break;
+                case Blocks.Stone:
+                    psr.material = blockBundle.LoadAsset<Material>("stone");
+                    break;
+                case Blocks.Wool:
+                    psr.material = blockBundle.LoadAsset<Material>("wool");
+                    break;
+                case Blocks.OakLeaves:
+                    psr.material = blockBundle.LoadAsset<Material>("leaves");
+                    break;
+                case Blocks.Glass:
+                    if (Plugin.Instance.stainedGlass)
+                        psr.material = blockBundle.LoadAsset<Material>("stainGlass");
+                    else
+                        psr.material = blockBundle.LoadAsset<Material>("glass");
+                    break;
+                case Blocks.CraftingTable:
+                    psr.material = blockBundle.LoadAsset<Material>("craft1");
+                    break;
+                case Blocks.Furnace:
+                    psr.material = blockBundle.LoadAsset<Material>("furn2");
+                    break;
+                case Blocks.IronOre:
+                    psr.material = blockBundle.LoadAsset<Material>("ironore");
+                    break;
+                case Blocks.GoldOre:
+                    psr.material = blockBundle.LoadAsset<Material>("goldore");
+                    break;
+                case Blocks.Netherrack:
+                    psr.material = blockBundle.LoadAsset<Material>("netherrack");
+                    break;
+                case Blocks.PackedIce:
+                    psr.material = blockBundle.LoadAsset<Material>("packed");
+                    break;
+                case Blocks.Obsidian:
+                    psr.material = blockBundle.LoadAsset<Material>("obsidian");
+                    break;
+                case Blocks.Bookshelf:
+                    psr.material = blockBundle.LoadAsset<Material>("bookshelf");
+                    break;
+            }
+
+            psr.material.mainTextureScale = new Vector2(0.2f, 0.2f);
+            if (block == Blocks.Wool)
+            {
+                psr.material.color = blockColour;
+            }
+
+            psr.material.mainTextureOffset = new Vector2(0.5f * Random.Range(0, 2), 0.5f * Random.Range(0, 2));
+
+            ps.Play();
+
+            particleObjectTemp.transform.SetParent(objectStorage.transform, false);
+            particleObjectTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 2;
+
+            mce.TriggerBlockDestroy(new MinecraftEvents.BlockArgs
+            {
+                block = block,
+                blockPosition = blockPosition
+            });
+        }
+
+        void UpdateAssets()
+        {
+            if (currentBlock != 9)
+                itemText.text = minecraftBlockListString[currentBlock];
+            else
+            {
+                if (Plugin.Instance.stainedGlass)
+                {
+                    itemText.text = "Stained Glass";
+                }
+                else
+                {
+                    itemText.text = minecraftBlockListString[currentBlock];
+                }
+            }
+
+            Transform ISTransform = itemShow.transform;
+
+            if (ISTransform.childCount != 0)
+            {
+                if (ISTransform.childCount >= 1)
+                    for (int i = 0; i < ISTransform.childCount; i++)
+                        Destroy(ISTransform.GetChild(i).gameObject);
+                else
+                    Destroy(ISTransform.GetChild(0).gameObject);
+            }
+
+            GameObject tempBlock = Instantiate(minecraftBlockList[currentBlock]);
+            tempBlock.transform.SetParent(itemShow.transform, false);
+
+            tempBlock.transform.localScale = Vector3.one;
+            tempBlock.transform.localPosition = Vector3.zero;
+            tempBlock.transform.localRotation = Quaternion.identity;
+
+            BoxCollider[] boxColliders = tempBlock.transform.GetComponentsInChildren<BoxCollider>();
+
+            foreach (BoxCollider bx in boxColliders)
+                bx.enabled = false;
+
+            if (currentBlock == 7)
+            {
+                Renderer[] renderers = tempBlock.transform.GetComponentsInChildren<Renderer>();
+
+                foreach (Renderer renderer in renderers)
+                    renderer.material.color = GetColour(0.9f);
+            }
+        }
+
 
         [HarmonyPatch(typeof(PlayerPrefs))]
         [HarmonyPatch("SetFloat", MethodType.Normal)]

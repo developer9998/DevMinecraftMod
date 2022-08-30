@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using BepInEx;
 using DevMinecraftMod.CI;
+using DevMinecraftMod.RPC;
 using DevMinecraftMod.Base;
 using DevMinecraftMod.Music;
 using Bepinject;
@@ -19,6 +20,8 @@ namespace DevMinecraftMod
     {
         public static Plugin Instance;
 
+        private static readonly MinecraftEvents events = new MinecraftEvents();
+
         public MinecraftFunction mf; // mother fucker 😲
         public bool mfExists = false;
 
@@ -32,6 +35,53 @@ namespace DevMinecraftMod
         public float musicVolume = 0.05f;
 
         public bool stainedGlass;
+
+        private void OnEnable()
+        {
+            if (mf == null)
+            {
+                mfExists = false;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (mf != null)
+            {
+                mfExists = true;
+            }
+        }
+
+        void Awake()
+        {
+            Instance = this;
+
+            Events.GameInitialized += OnGameInitialized;
+
+            Zenjector.Install<MainInstaller>().OnProject();
+        }
+
+        void OnGameInitialized(object sender, EventArgs e)
+        {
+            if (mf == null && !mfExists)
+            {
+                mf = gameObject.AddComponent<MinecraftFunction>();
+                mfExists = true;
+
+                mf.mce = events;
+
+                Destroy(GameObject.Find("NetworkTriggers/QuitBox").GetComponent<GorillaQuitBox>());
+                GameObject.Find("NetworkTriggers/QuitBox").AddComponent<MinecraftQuitBox>();
+
+                GetSettings();
+
+                if (mm == null && !mmExists)
+                {
+                    mm = gameObject.AddComponent<MinecraftMusic>();
+                    mmExists = true;
+                }
+            }
+        }
 
         private void GetSettings()
         {
@@ -57,48 +107,6 @@ namespace DevMinecraftMod
             return inRoom;
         }
 
-        private void OnEnable()
-        {
-            if (mf == null)
-            {
-                mfExists = false;
-            }
-        }
-
-        private void OnDisable()
-        {
-            if (mf != null)
-            {
-                mfExists = true;
-            }
-        }
-
-        void Awake()
-        {
-            Instance = this;
-            Events.GameInitialized += OnGameInitialized;
-            Zenjector.Install<MainInstaller>().OnProject();
-        }
-
-        void OnGameInitialized(object sender, EventArgs e)
-        {
-            if (mf == null && !mfExists)
-            {
-                mf = gameObject.AddComponent<MinecraftFunction>();
-                mfExists = true;
-
-                Destroy(GameObject.Find("NetworkTriggers/QuitBox").GetComponent<GorillaQuitBox>());
-                GameObject.Find("NetworkTriggers/QuitBox").AddComponent<MinecraftQuitBox>();
-
-                GetSettings();
-
-                if (mm == null && !mmExists)
-                {
-                    mm = gameObject.AddComponent<MinecraftMusic>();
-                    mmExists = true;
-                }
-            }
-        }
 
         [ModdedGamemodeJoin] private void RoomJoinedModded() => inRoom = true;
         [ModdedGamemodeLeave] private void RoomLeftModded() => inRoom = false;
