@@ -7,8 +7,6 @@ using UnityEngine.XR;
 using HarmonyLib;
 using Photon.Pun;
 using GorillaLocomotion;
-using DevMinecraftMod.RPC;
-using Utilla;
 
 // programmed by dev.
 // updated material data by frogrilla, thank you :)
@@ -19,7 +17,6 @@ namespace DevMinecraftMod.Base
     {
 
         public static MinecraftFunction Instance;
-        public MinecraftEvents mce;
 
         private GameObject objectStorage;
         private GameObject objectStorageBlock;
@@ -784,12 +781,6 @@ namespace DevMinecraftMod.Base
 
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
             audioSourceTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 3;
-
-            mce.TriggerBlockPlace(new MinecraftEvents.BlockArgs
-            {
-                block = block,
-                blockPosition = blockPosition
-            });
         }
 
         void DestroyBlock(Blocks block, Vector3 blockPosition, Color blockColour)
@@ -938,12 +929,6 @@ namespace DevMinecraftMod.Base
 
             particleObjectTemp.transform.SetParent(objectStorage.transform, false);
             particleObjectTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 2;
-
-            mce.TriggerBlockDestroy(new MinecraftEvents.BlockArgs
-            {
-                block = block,
-                blockPosition = blockPosition
-            });
         }
 
         void UpdateAssets()

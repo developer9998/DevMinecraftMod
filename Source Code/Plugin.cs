@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using BepInEx;
 using DevMinecraftMod.CI;
-using DevMinecraftMod.RPC;
 using DevMinecraftMod.Base;
 using DevMinecraftMod.Music;
 using Bepinject;
@@ -19,8 +18,6 @@ namespace DevMinecraftMod
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance;
-
-        private static readonly MinecraftEvents events = new MinecraftEvents();
 
         public MinecraftFunction mf; // mother fucker 😲
         public bool mfExists = false;
@@ -67,8 +64,6 @@ namespace DevMinecraftMod
             {
                 mf = gameObject.AddComponent<MinecraftFunction>();
                 mfExists = true;
-
-                mf.mce = events;
 
                 Destroy(GameObject.Find("NetworkTriggers/QuitBox").GetComponent<GorillaQuitBox>());
                 GameObject.Find("NetworkTriggers/QuitBox").AddComponent<MinecraftQuitBox>();
