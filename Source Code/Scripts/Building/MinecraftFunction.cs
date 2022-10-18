@@ -129,7 +129,7 @@ namespace DevMinecraftMod.Base
                 bx.gameObject.layer = 8;
             }
 
-            Transform palm = GameObject.Find("OfflineVRRig/Actual Gorilla/rig/body/shoulder.L/upper_arm.L/forearm.L/hand.L/palm.01.L/").transform;
+            Transform palm = GorillaTagger.Instance.offlineVRRig.leftHandTransform.parent.Find("palm.01.L").gameObject.transform;
             itemIndicator = Instantiate(blockBundle.LoadAsset<GameObject>("ItemSelector"));
 
             itemIndicator.transform.SetParent(palm, false);
@@ -139,7 +139,7 @@ namespace DevMinecraftMod.Base
 
             itemIndicator.SetActive(false);
 
-            Transform palm2 = GameObject.Find("OfflineVRRig/Actual Gorilla/rig/body/shoulder.R/upper_arm.R/forearm.R/hand.R/palm.01.R/").transform;
+            Transform palm2 = GorillaTagger.Instance.offlineVRRig.rightHandTransform.parent.Find("palm.01.R").gameObject.transform;
 
             itemShow = new GameObject();
             itemShow.transform.SetParent(palm2, false);
