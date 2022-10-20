@@ -7,6 +7,7 @@ namespace DevMinecraftMod.CI
 {
     public class MinecraftView : ComputerView
     {
+        public static MinecraftView Instance;
         private readonly UISelectionHandler _selectionHandler;
 
         private readonly string titleColour = "2C9047";
@@ -17,6 +18,8 @@ namespace DevMinecraftMod.CI
 
         public MinecraftView()
         {
+            Instance = this;
+
             _selectionHandler = new UISelectionHandler(EKeyboardKey.Up, EKeyboardKey.Down, EKeyboardKey.Enter);
             _selectionHandler.MaxIdx = 3;
             _selectionHandler.OnSelected += OnEntrySelected;
@@ -38,22 +41,15 @@ namespace DevMinecraftMod.CI
                     Plugin.Instance.sIndicatorEnabled = !Plugin.Instance.sIndicatorEnabled;
 
                     if (!Plugin.Instance.sIndicatorEnabled && !Plugin.Instance.lIndicatorEnabled)
-                    {
                         Plugin.Instance.lIndicatorEnabled = true;
-                    }
 
                     break;
                 case 1:
                     Plugin.Instance.lIndicatorEnabled = !Plugin.Instance.lIndicatorEnabled;
 
                     if (!Plugin.Instance.sIndicatorEnabled && !Plugin.Instance.lIndicatorEnabled)
-                    {
                         Plugin.Instance.sIndicatorEnabled = true;
-                    }
 
-                    break;
-                case 3:
-                    MinecraftMusic.Instance.SetButtonMode(!MinecraftMusic.Instance.isActivated);
                     break;
             }
 
@@ -67,7 +63,10 @@ namespace DevMinecraftMod.CI
                 case 2:
                     float offset = increase ? 0.025f : -0.025f;
                     Plugin.Instance.musicVolume = Mathf.Clamp(Plugin.Instance.musicVolume + offset, 0.025f, 0.125f);
-
+                    break;
+                case 3:
+                    float offsetB = increase ? 0.1f : -0.1f;
+                    Plugin.Instance.blockVolume = Mathf.Clamp(Plugin.Instance.blockVolume + offsetB, 0.1f, 0.5f);
                     break;
             }
             Plugin.Instance.SetSettings();
@@ -93,12 +92,11 @@ namespace DevMinecraftMod.CI
                     .AppendLine();
 
                 str.AppendLine(_selectionHandler.GetIndicatedText(2, $"Music Volume: <color={"#" + selectionColour}>{Plugin.Instance.musicVolume}</color>"));
-                str.AppendLine(_selectionHandler.GetIndicatedText(3, $"Music Enabled: <color={(!MinecraftMusic.Instance.isActivated ? "#" + enableColour : "#" + disableColour)}>[{(!MinecraftMusic.Instance.isActivated ? "Enabled" : "Disabled")}]</color>"))
+                str.AppendLine(_selectionHandler.GetIndicatedText(3, $"Block Volume: <color={"#" + selectionColour}>{Plugin.Instance.blockVolume}</color>"))
                 .AppendLines(1);
 
                 str.BeginCenter()
                 .AppendLine($"<color={"#" + selectionColour}>Update the screen with Option 1</color>")
-                .AppendLine($"<color={"#" + selectionColour}>{(Plugin.Instance.stainedGlass ? "Stained Glass Enabled" : "")}</color>")
                 .EndAlign();
 
             });
@@ -124,10 +122,6 @@ namespace DevMinecraftMod.CI
                     ReturnToMainMenu();
                     break;
                 case EKeyboardKey.Option1:
-                    UpdateScreen();
-                    break;
-                case EKeyboardKey.Option2:
-                    Plugin.Instance.stainedGlass = !Plugin.Instance.stainedGlass;
                     UpdateScreen();
                     break;
             }

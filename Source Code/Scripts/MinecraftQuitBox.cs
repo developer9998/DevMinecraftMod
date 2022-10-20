@@ -26,8 +26,6 @@ namespace DevMinecraftMod.Base
 
             Player.Instance.GetComponent<Rigidbody>().position = target;
             Player.Instance.GetComponent<Rigidbody>().velocity = Vector3.zero;
-
-            Player.Instance.Turn(-90f - Player.Instance.headCollider.transform.rotation.eulerAngles.y);
         }
     }
 }

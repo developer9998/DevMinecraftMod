@@ -6,11 +6,13 @@
 
   <ItemGroup>
     <None Remove="Resources\devminecraft" />
+    <None Remove="Resources\devminecraftblock" />
     <None Remove="Resources\devminecraftmusic" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\devminecraft" />
+    <EmbeddedResource Include="Resources\devminecraftblock" />
     <EmbeddedResource Include="Resources\devminecraftmusic" />
   </ItemGroup>
 
@@ -69,6 +71,9 @@
     <Reference Include="PhotonVoice.PUN">
       <HintPath>$(GameAssemblyPath)\PhotonVoice.PUN.dll</HintPath>
     </Reference>
+	  <Reference Include="SteamVR">
+		  <HintPath>$(GameAssemblyPath)\SteamVR.dll</HintPath>
+	  </Reference>
     <Reference Include="PlayFab">
       <HintPath>$(GameAssemblyPath)\PlayFab.dll</HintPath>
     </Reference>
