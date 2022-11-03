@@ -10,13 +10,13 @@ using UnityEngine.InputSystem;
 
 namespace DevMinecraftMod.Base
 {
-    public class MinecraftRecoverFunction : MonoBehaviourPunCallbacks
+    public class Recover : MonoBehaviourPunCallbacks
     {
-        public static MinecraftRecoverFunction Instance { get; private set; }
+        public static Recover Instance { get; private set; }
 
         public string location;
 
-        public MinecraftRecoverData recoverData = new MinecraftRecoverData();
+        public RecoverData recoverData = new RecoverData();
 
         public bool doThis = true;
 
@@ -27,13 +27,13 @@ namespace DevMinecraftMod.Base
             location = Plugin.Instance.location + $"\\MapData.json";
 
             if (File.Exists(location))
-                recoverData = JsonUtility.FromJson<MinecraftRecoverData>(File.ReadAllText(location));
+                recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
         }
 
         public void SetData()
         {
             MinecraftLogger.Log($"attempting to save mapdata");
-            if (MinecraftFunction.Instance.blockLinks.Count == 0)
+            if (MinecraftMod.Instance.blockLinks.Count == 0)
             {
                 doThis = true;
                 return;
@@ -45,10 +45,10 @@ namespace DevMinecraftMod.Base
             recoverData.blockIndexs.Clear();
             recoverData.colors.Clear();
             float currentIndex = 0;
-            float maxBlocks = MinecraftFunction.Instance.minecraftBlocks.Count;
-            for (int i = 0; i < MinecraftFunction.Instance.blockLinks.Count; i++)
+            float maxBlocks = MinecraftMod.Instance.minecraftBlocks.Count;
+            for (int i = 0; i < MinecraftMod.Instance.blockLinks.Count; i++)
             {
-                MinecraftBlockLink link = MinecraftFunction.Instance.blockLinks[i];
+                MinecraftBlock link = MinecraftMod.Instance.blockLinks[i];
                 
                 if (!recoverData.blocks.Contains(link.minecraftObject))
                 {
@@ -86,16 +86,16 @@ namespace DevMinecraftMod.Base
                 return;
             }
 
-            if (MinecraftFunction.Instance.minecraftBlocks.Count != 0)
+            if (MinecraftMod.Instance.minecraftBlocks.Count != 0)
             {
-                while (MinecraftFunction.Instance.minecraftBlocks.Count != 0)
-                    MinecraftFunction.Instance.DestroyAllBlocks();
+                while (MinecraftMod.Instance.minecraftBlocks.Count != 0)
+                    MinecraftMod.Instance.DestroyAllBlocks();
             }
 
             try
             {
                 for (int i = 0; i < recoverData.blockIndexs.Count; i++)
-                    MinecraftFunction.Instance.CreateBlock(recoverData.blockIndexs[i], recoverData.positions[i], recoverData.eulerAngles[i], recoverData.colors[i]);
+                    MinecraftMod.Instance.CreateBlock(recoverData.blockIndexs[i], recoverData.positions[i], recoverData.eulerAngles[i], recoverData.colors[i]);
             }
             catch (Exception e)
             {

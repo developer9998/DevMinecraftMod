@@ -1,14 +1,11 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using Valve.VR;
 
 namespace DevMinecraftMod.Base
 {
-    public class MinecraftColourSlotButton : MonoBehaviour
+    public class ButtonRecover : MonoBehaviour
     {
-        public int slot;
-
-        public float debounceTime = 0.25f * 1.25f;
+        public float debounceTime = 0.75f;
 
         public float touchTime;
         public bool eq;
@@ -39,19 +36,12 @@ namespace DevMinecraftMod.Base
                 return;
 
             GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength * 0.35f, GorillaTagger.Instance.tapHapticDuration * 0.75f);
-            GorillaTagger.Instance.offlineVRRig.tagSound.PlayOneShot(MinecraftFunction.Instance.clip, 0.75f);
-
-            MinecraftFunction.Instance.ClearColourSlots();
-
-            MinecraftFunction.Instance.currentColourMode = slot;
+            GorillaTagger.Instance.offlineVRRig.tagSound.PlayOneShot(MinecraftMod.Instance.clip, 0.75f);
 
             if (eq)
-                MinecraftFunction.Instance.itemIndicator.transform.Find("CurrentColourText").GetComponent<Text>().text = "Slot: " + slot;
-
-            if (eq)
-                MinecraftFunction.Instance.SetEquipSlot(MinecraftFunction.Instance.currentColourMode, true);
+                Recover.Instance.LoadData();
             else
-                MinecraftFunction.Instance.SetGetSlot(MinecraftFunction.Instance.currentColourMode, true);
+                Recover.Instance.SetData();
 
         }
     }

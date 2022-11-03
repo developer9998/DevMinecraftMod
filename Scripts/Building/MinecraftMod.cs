@@ -9,19 +9,22 @@ using GorillaLocomotion;
 using System.Collections;
 
 // programmed by dev.
-// updated material data by frogrilla, thank you :)
+// material data from me, graic, and frogrilla on the official gorilla tag modding discord
 
 // 10/17/2022
-// a ton of this code cified, although because this script is worth over 2.9k lines i'm not in the mood to do it right now.
+// a ton of this code is pretty old, although because its worth over 2.9k lines i'm not in the mood to reprogram large chunks of it rn
+
+// 11/3/2022
+// the mod is literally my second most viewed mod on github
 
 namespace DevMinecraftMod.Base
 {
-    public class MinecraftFunction : MonoBehaviour
+    public class MinecraftMod : MonoBehaviour
     {
 
-        public static MinecraftFunction Instance;
+        public static MinecraftMod Instance;
 
-        public List<MinecraftBlockLink> blockLinks = new List<MinecraftBlockLink>();
+        public List<MinecraftBlock> blockLinks = new List<MinecraftBlock>();
 
         public GameObject objectStorage;
         private GameObject objectStorageBlock;
@@ -222,7 +225,7 @@ namespace DevMinecraftMod.Base
             }
 
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
-            audioSourceTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 3;
+            audioSourceTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 3;
         }
 
         void DestroyBlock(Blocks block, Vector3 blockPosition, Color blockColour)
@@ -387,103 +390,104 @@ namespace DevMinecraftMod.Base
             }
 
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
-            audioSourceTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 3;
+            audioSourceTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 3;
 
             GameObject particleObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("BlockParticle"));
             particleObjectTemp.transform.position = blockPosition - new Vector3(0, 0.15f, 0);
 
-            ParticleSystem ps = particleObjectTemp.GetComponent<ParticleSystem>(); // play station
-            ParticleSystemRenderer psr = ps.GetComponent<ParticleSystemRenderer>();
-
-            SetParticleMaterial(psr, blockBundle, "dirt", Blocks.Grass, block);
-            SetParticleMaterial(psr, blockBundle, "dirt", Blocks.Dirt, block);
-            SetParticleMaterial(psr, blockBundle, "log", Blocks.OakLog, block);
-
-            SetParticleMaterial(psr, blockBundleAlt, "SpruceLog", Blocks.SpruceLog, block);
-            SetParticleMaterial(psr, blockBundleAlt, "BirchLog", Blocks.BirchLog, block);
-            SetParticleMaterial(psr, blockBundleAlt, "JungleLog", Blocks.JungleLog, block);
-            SetParticleMaterial(psr, blockBundleAlt, "AcaciaLog", Blocks.AcaciaLog, block);
-            SetParticleMaterial(psr, blockBundleAlt, "BigOakLog", Blocks.DarkOakLog, block);
-
-            SetParticleMaterial(psr, blockBundle, "plank", Blocks.OakPlanks, block);
-
-            SetParticleMaterial(psr, blockBundleAlt, "SprucePlanks", Blocks.SprucePlanks, block);
-            SetParticleMaterial(psr, blockBundleAlt, "BirchPlanks", Blocks.BirchPlanks, block);
-            SetParticleMaterial(psr, blockBundleAlt, "JunglePlanks", Blocks.JunglePlanks, block);
-            SetParticleMaterial(psr, blockBundleAlt, "AcaciaPlanks", Blocks.AcaciaPlanks, block);
-            SetParticleMaterial(psr, blockBundleAlt, "DarkOakPlanks", Blocks.DarkOakPlanks, block);
-
-            SetParticleMaterial(psr, blockBundle, "leaves", Blocks.OakLeaves, block);
-            SetParticleMaterial(psr, blockBundleAlt, "SpruceLeaves", Blocks.SpruceLeaves, block);
-            SetParticleMaterial(psr, blockBundleAlt, "BirchLeaves", Blocks.BirchLeaves, block);
-            SetParticleMaterial(psr, blockBundleAlt, "JungleLeaves", Blocks.JungleLeaves, block);
-            SetParticleMaterial(psr, blockBundleAlt, "AcaciaLeaves", Blocks.AcaciaLeaves, block);
-            SetParticleMaterial(psr, blockBundleAlt, "DarkOakLeaves", Blocks.DarkOakLeaves, block);
-
-            SetParticleMaterial(psr, blockBundle, "stone", Blocks.Stone, block);
-            SetParticleMaterial(psr, blockBundle, "cobblestone", Blocks.Cobblestone, block);
-            SetParticleMaterial(psr, blockBundle, "brick", Blocks.Brick, block);
-
-            SetParticleMaterial(psr, blockBundleAlt, "CoalOre", Blocks.CoalOre, block);
-            SetParticleMaterial(psr, blockBundleAlt, "RedstoneOre", Blocks.RedstoneOre, block);
-            SetParticleMaterial(psr, blockBundleAlt, "EmeraldOre", Blocks.EmeraldOre, block);
-            SetParticleMaterial(psr, blockBundleAlt, "LapisOre", Blocks.LapisOre, block);
-            SetParticleMaterial(psr, blockBundleAlt, "DiamondOre", Blocks.DiamondOre, block);
-
-            SetParticleMaterial(psr, blockBundle, "ironore", Blocks.IronOre, block);
-            SetParticleMaterial(psr, blockBundle, "goldore", Blocks.GoldOre, block);
-
-            SetParticleMaterial(psr, blockBundleAlt, "CoalBlock", Blocks.CoalBlock, block);
-            SetParticleMaterial(psr, blockBundleAlt, "RedstoneBlock", Blocks.RedstoneBlock, block);
-            SetParticleMaterial(psr, blockBundleAlt, "EmeraldBlock", Blocks.EmeraldBlock, block);
-            SetParticleMaterial(psr, blockBundleAlt, "LapisBlock", Blocks.LapisBlock, block);
-            SetParticleMaterial(psr, blockBundleAlt, "DiamondBlock", Blocks.DiamondBlock, block);
-            SetParticleMaterial(psr, blockBundleAlt, "IronBlock", Blocks.IronBlock, block);
-            SetParticleMaterial(psr, blockBundleAlt, "GoldBlock", Blocks.GoldBlock, block);
-
-            SetParticleMaterial(psr, blockBundle, "glass", Blocks.Glass, block);
-            SetParticleMaterial(psr, blockBundle, "stainGlass", Blocks.StainedGlass, block);
-            SetParticleMaterial(psr, blockBundle, "wool", Blocks.Wool, block);
-            SetParticleMaterial(psr, blockBundle, "bookshelf", Blocks.Bookshelf, block);
-
-            SetParticleMaterial(psr, blockBundle, "craft1", Blocks.CraftingTable, block);
-            SetParticleMaterial(psr, blockBundle, "furn2", Blocks.Furnace, block);
-
-            SetParticleMaterial(psr, blockBundle, "netherrack", Blocks.Netherrack, block);
-            SetParticleMaterial(psr, blockBundle, "packed", Blocks.PackedIce, block);
-            SetParticleMaterial(psr, blockBundle, "obsidian", Blocks.Obsidian, block);
-
-            SetParticleMaterial(psr, blockBundleAlt, "SoulSand", Blocks.SoulSand, block);
-            SetParticleMaterial(psr, blockBundleAlt, "RegularIce", Blocks.RegularIce, block);
-            SetParticleMaterial(psr, blockBundleAlt, "Glowstone", Blocks.Glowstone, block);
-
-            SetParticleMaterial(psr, blockBundleAlt, "SlimeBlock", Blocks.SlimeBlock, block);
-
-            SetParticleMaterial(psr, blockBundleAlt, "PumpkinFront", Blocks.Pumpkin, block);
-            SetParticleMaterial(psr, blockBundleAlt, "PumpkinOn", Blocks.Jackolantern, block);
-            SetParticleMaterial(psr, blockBundleAlt, "MelonSide", Blocks.Melon, block);
-            SetParticleMaterial(psr, blockBundleAlt, "HaySide", Blocks.HayBale, block);
-            SetParticleMaterial(psr, blockBundleAlt, "Sponge", Blocks.Sponge, block);
-            SetParticleMaterial(psr, blockBundleAlt, "bedrock", Blocks.Bedrock, block);
-
-            SetParticleMaterial(psr, blockBundle, "brick", Blocks.Brick, block);
-
-            psr.material.mainTextureScale = new Vector2(0.2f, 0.2f);
-            if (block == Blocks.Wool)
+            foreach (ParticleSystem partS in particleObjectTemp.transform.GetComponentsInChildren<ParticleSystem>())
             {
-                psr.material.color = blockColour;
-            }
-            if (block == Blocks.StainedGlass)
-            {
-                psr.material.color = blockColour;
-            }
+                ParticleSystemRenderer psr = partS.GetComponent<ParticleSystemRenderer>();
 
-            psr.material.mainTextureOffset = new Vector2(0.1f * Random.Range(0, 11), 0.1f * Random.Range(0, 11));
+                SetParticleMaterial(psr, blockBundle, "dirt", Blocks.Grass, block);
+                SetParticleMaterial(psr, blockBundle, "dirt", Blocks.Dirt, block);
+                SetParticleMaterial(psr, blockBundle, "log", Blocks.OakLog, block);
 
-            ps.Play();
+                SetParticleMaterial(psr, blockBundleAlt, "SpruceLog", Blocks.SpruceLog, block);
+                SetParticleMaterial(psr, blockBundleAlt, "BirchLog", Blocks.BirchLog, block);
+                SetParticleMaterial(psr, blockBundleAlt, "JungleLog", Blocks.JungleLog, block);
+                SetParticleMaterial(psr, blockBundleAlt, "AcaciaLog", Blocks.AcaciaLog, block);
+                SetParticleMaterial(psr, blockBundleAlt, "BigOakLog", Blocks.DarkOakLog, block);
+
+                SetParticleMaterial(psr, blockBundle, "plank", Blocks.OakPlanks, block);
+
+                SetParticleMaterial(psr, blockBundleAlt, "SprucePlanks", Blocks.SprucePlanks, block);
+                SetParticleMaterial(psr, blockBundleAlt, "BirchPlanks", Blocks.BirchPlanks, block);
+                SetParticleMaterial(psr, blockBundleAlt, "JunglePlanks", Blocks.JunglePlanks, block);
+                SetParticleMaterial(psr, blockBundleAlt, "AcaciaPlanks", Blocks.AcaciaPlanks, block);
+                SetParticleMaterial(psr, blockBundleAlt, "DarkOakPlanks", Blocks.DarkOakPlanks, block);
+
+                SetParticleMaterial(psr, blockBundle, "leaves", Blocks.OakLeaves, block);
+                SetParticleMaterial(psr, blockBundleAlt, "SpruceLeaves", Blocks.SpruceLeaves, block);
+                SetParticleMaterial(psr, blockBundleAlt, "BirchLeaves", Blocks.BirchLeaves, block);
+                SetParticleMaterial(psr, blockBundleAlt, "JungleLeaves", Blocks.JungleLeaves, block);
+                SetParticleMaterial(psr, blockBundleAlt, "AcaciaLeaves", Blocks.AcaciaLeaves, block);
+                SetParticleMaterial(psr, blockBundleAlt, "DarkOakLeaves", Blocks.DarkOakLeaves, block);
+
+                SetParticleMaterial(psr, blockBundle, "stone", Blocks.Stone, block);
+                SetParticleMaterial(psr, blockBundle, "cobblestone", Blocks.Cobblestone, block);
+                SetParticleMaterial(psr, blockBundle, "brick", Blocks.Brick, block);
+
+                SetParticleMaterial(psr, blockBundleAlt, "CoalOre", Blocks.CoalOre, block);
+                SetParticleMaterial(psr, blockBundleAlt, "RedstoneOre", Blocks.RedstoneOre, block);
+                SetParticleMaterial(psr, blockBundleAlt, "EmeraldOre", Blocks.EmeraldOre, block);
+                SetParticleMaterial(psr, blockBundleAlt, "LapisOre", Blocks.LapisOre, block);
+                SetParticleMaterial(psr, blockBundleAlt, "DiamondOre", Blocks.DiamondOre, block);
+
+                SetParticleMaterial(psr, blockBundle, "ironore", Blocks.IronOre, block);
+                SetParticleMaterial(psr, blockBundle, "goldore", Blocks.GoldOre, block);
+
+                SetParticleMaterial(psr, blockBundleAlt, "CoalBlock", Blocks.CoalBlock, block);
+                SetParticleMaterial(psr, blockBundleAlt, "RedstoneBlock", Blocks.RedstoneBlock, block);
+                SetParticleMaterial(psr, blockBundleAlt, "EmeraldBlock", Blocks.EmeraldBlock, block);
+                SetParticleMaterial(psr, blockBundleAlt, "LapisBlock", Blocks.LapisBlock, block);
+                SetParticleMaterial(psr, blockBundleAlt, "DiamondBlock", Blocks.DiamondBlock, block);
+                SetParticleMaterial(psr, blockBundleAlt, "IronBlock", Blocks.IronBlock, block);
+                SetParticleMaterial(psr, blockBundleAlt, "GoldBlock", Blocks.GoldBlock, block);
+
+                SetParticleMaterial(psr, blockBundle, "glass", Blocks.Glass, block);
+                SetParticleMaterial(psr, blockBundle, "stainGlass", Blocks.StainedGlass, block);
+                SetParticleMaterial(psr, blockBundle, "wool", Blocks.Wool, block);
+                SetParticleMaterial(psr, blockBundle, "bookshelf", Blocks.Bookshelf, block);
+
+                SetParticleMaterial(psr, blockBundle, "craft1", Blocks.CraftingTable, block);
+                SetParticleMaterial(psr, blockBundle, "furn2", Blocks.Furnace, block);
+
+                SetParticleMaterial(psr, blockBundle, "netherrack", Blocks.Netherrack, block);
+                SetParticleMaterial(psr, blockBundle, "packed", Blocks.PackedIce, block);
+                SetParticleMaterial(psr, blockBundle, "obsidian", Blocks.Obsidian, block);
+
+                SetParticleMaterial(psr, blockBundleAlt, "SoulSand", Blocks.SoulSand, block);
+                SetParticleMaterial(psr, blockBundleAlt, "RegularIce", Blocks.RegularIce, block);
+                SetParticleMaterial(psr, blockBundleAlt, "Glowstone", Blocks.Glowstone, block);
+
+                SetParticleMaterial(psr, blockBundleAlt, "SlimeBlock", Blocks.SlimeBlock, block);
+
+                SetParticleMaterial(psr, blockBundleAlt, "PumpkinFront", Blocks.Pumpkin, block);
+                SetParticleMaterial(psr, blockBundleAlt, "PumpkinOn", Blocks.Jackolantern, block);
+                SetParticleMaterial(psr, blockBundleAlt, "MelonSide", Blocks.Melon, block);
+                SetParticleMaterial(psr, blockBundleAlt, "HaySide", Blocks.HayBale, block);
+                SetParticleMaterial(psr, blockBundleAlt, "Sponge", Blocks.Sponge, block);
+                SetParticleMaterial(psr, blockBundleAlt, "bedrock", Blocks.Bedrock, block);
+
+                SetParticleMaterial(psr, blockBundle, "brick", Blocks.Brick, block);
+
+                psr.material.mainTextureScale = new Vector2(0.2f, 0.2f);
+                if (block == Blocks.Wool)
+                {
+                    psr.material.color = blockColour;
+                }
+                if (block == Blocks.StainedGlass)
+                {
+                    psr.material.color = blockColour;
+                }
+
+                psr.material.mainTextureOffset = new Vector2(0.1f * Random.Range(0, 11), 0.1f * Random.Range(0, 11));
+                partS.Play();
+            }
 
             particleObjectTemp.transform.SetParent(objectStorage.transform, false);
-            particleObjectTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 2;
+            particleObjectTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 2;
         }
 
         void DestroyBlockOptimized(Blocks block, Vector3 blockPosition, Color blockColour)
@@ -750,13 +754,13 @@ namespace DevMinecraftMod.Base
 
         public void DestroyBlockOptimized(GameObject destroyObject)
         {
-            if (destroyObject.GetComponent<MinecraftBlockLink>() == null)
+            if (destroyObject.GetComponent<MinecraftBlock>() == null)
                 return;
 
-            MinecraftBlockLink destroyObjectBlockLink = destroyObject.GetComponent<MinecraftBlockLink>();
+            MinecraftBlock destroyObjectBlockLink = destroyObject.GetComponent<MinecraftBlock>();
             Transform tempBlock = destroyObjectBlockLink.minecraftObject.transform;
 
-            foreach (MinecraftBlockLink link in tempBlock.GetComponentsInChildren<MinecraftBlockLink>(true))
+            foreach (MinecraftBlock link in tempBlock.GetComponentsInChildren<MinecraftBlock>(true))
             {
                 if (blockLinks.Contains(link))
                     blockLinks.Remove(link);
@@ -776,7 +780,7 @@ namespace DevMinecraftMod.Base
 
             for (int i = 0; i < minecraftBlocks.Count; i++)
             {
-                MinecraftBlockLink QueuedMinecraftBlockLink = minecraftBlocks[i].transform.Find("Collider/Front").GetComponent<MinecraftBlockLink>();
+                MinecraftBlock QueuedMinecraftBlockLink = minecraftBlocks[i].transform.Find("Collider/Front").GetComponent<MinecraftBlock>();
 
                 DestroyBlockOptimized(QueuedMinecraftBlockLink.gameObject);
             }
@@ -796,7 +800,7 @@ namespace DevMinecraftMod.Base
             {
                 if (block.GetChild(i).gameObject.name == "Top")
                 {
-                    block.GetChild(i).gameObject.AddComponent<MinecraftSlimeBlock>();
+                    block.GetChild(i).gameObject.AddComponent<SlimeBlock>();
                 }
             }
         }
@@ -1243,7 +1247,7 @@ namespace DevMinecraftMod.Base
                         bx.enabled = true;
                         bx.gameObject.layer = 0;
 
-                        MinecraftBlockLink bl = bx.gameObject.AddComponent<MinecraftBlockLink>();
+                        MinecraftBlock bl = bx.gameObject.AddComponent<MinecraftBlock>();
 
                         bl.minecraftObject = tempBlock;
 
@@ -1440,17 +1444,17 @@ namespace DevMinecraftMod.Base
             }
             else if (blockIndex == 30)
             {
-                SetSurfaceIndexOther(blockColliders, 24, 24, 24, 24, 24, 24, false, false, blockColour);
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
                 usedBlockEnum = Blocks.IronBlock;
             }
             else if (blockIndex == 31)
             {
-                SetSurfaceIndexOther(blockColliders, 24, 24, 24, 24, 24, 24, false, false, blockColour);
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
                 usedBlockEnum = Blocks.GoldBlock;
             }
             else if (blockIndex == 32)
             {
-                SetSurfaceIndexOther(blockColliders, 24, 24, 24, 24, 24, 24, false, false, blockColour);
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
                 usedBlockEnum = Blocks.RedstoneBlock;
             }
             else if (blockIndex == 33)
@@ -1460,12 +1464,12 @@ namespace DevMinecraftMod.Base
             }
             else if (blockIndex == 34)
             {
-                SetSurfaceIndexOther(blockColliders, 24, 24, 24, 24, 24, 24, false, false, blockColour);
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
                 usedBlockEnum = Blocks.EmeraldBlock;
             }
             else if (blockIndex == 35)
             {
-                SetSurfaceIndexOther(blockColliders, 24, 24, 24, 24, 24, 24, false, false, blockColour);
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
                 usedBlockEnum = Blocks.DiamondBlock;
             }
             else if (blockIndex == 36)
@@ -1533,18 +1537,18 @@ namespace DevMinecraftMod.Base
             }
             else if (blockIndex == 48)
             {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                SetSurfaceIndexOther(blockColliders, 82, 82, 82, 82, 82, 82, false, false, blockColour);
                 usedBlockEnum = Blocks.SlimeBlock;
                 SetTrampoline(blockColliders);
             }
             else if (blockIndex == 49)
             {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 8, 8, false, false, blockColour);
+                SetSurfaceIndexOther(blockColliders, 81, 81, 81, 81, 81, 81, false, false, blockColour);
                 usedBlockEnum = Blocks.Pumpkin;
             }
             else if (blockIndex == 50)
             {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 8, 8, false, false, blockColour);
+                SetSurfaceIndexOther(blockColliders, 81, 81, 81, 81, 81, 81, false, false, blockColour);
                 usedBlockEnum = Blocks.Jackolantern;
             }
             else if (blockIndex == 51)
@@ -1580,7 +1584,7 @@ namespace DevMinecraftMod.Base
                 bx.enabled = true;
                 bx.gameObject.layer = 0;
 
-                MinecraftBlockLink bl = bx.gameObject.AddComponent<MinecraftBlockLink>();
+                MinecraftBlock bl = bx.gameObject.AddComponent<MinecraftBlock>();
 
                 bl.minecraftObject = tempBlock;
 
@@ -1600,23 +1604,23 @@ namespace DevMinecraftMod.Base
 
         public void DestroyBlock(GameObject destroyObject)
         {
-            if (destroyObject.GetComponent<MinecraftBlockLink>() == null)
+            if (destroyObject.GetComponent<MinecraftBlock>() == null)
                 return;
 
-            MinecraftBlockLink destroyObjectBlockLink = destroyObject.GetComponent<MinecraftBlockLink>();
+            MinecraftBlock destroyObjectBlockLink = destroyObject.GetComponent<MinecraftBlock>();
 
             // erfhegrrfo0dwjigvrewr
 
             Transform tempBlock = destroyObjectBlockLink.minecraftObject.transform;
-            MinecraftBlockLink[] tempLinks = tempBlock.GetComponentsInChildren<MinecraftBlockLink>();
+            MinecraftBlock[] tempLinks = tempBlock.GetComponentsInChildren<MinecraftBlock>();
 
-            foreach (MinecraftBlockLink link in tempBlock.GetComponentsInChildren<MinecraftBlockLink>(true))
+            foreach (MinecraftBlock link in tempBlock.GetComponentsInChildren<MinecraftBlock>(true))
             {
                 if (blockLinks.Contains(link))
                     blockLinks.Remove(link);
             }
 
-            foreach (MinecraftBlockLink link in tempLinks)
+            foreach (MinecraftBlock link in tempLinks)
             {
                 if (blockLinks.Contains(link))
                 {
@@ -1949,10 +1953,10 @@ namespace DevMinecraftMod.Base
 
                 ln.enabled = Plugin.Instance.lIndicatorEnabled;
 
-                if (hit.transform.gameObject != null && hit.transform.GetComponent<MinecraftBlockLink>() != null)
+                if (hit.transform.gameObject != null && hit.transform.GetComponent<MinecraftBlock>() != null)
                 {
-                    blockAlt.transform.position = hit.transform.GetComponent<MinecraftBlockLink>().minecraftObject.transform.position;
-                    blockAlt.transform.rotation = hit.transform.GetComponent<MinecraftBlockLink>().minecraftObject.transform.rotation;
+                    blockAlt.transform.position = hit.transform.GetComponent<MinecraftBlock>().minecraftObject.transform.position;
+                    blockAlt.transform.rotation = hit.transform.GetComponent<MinecraftBlock>().minecraftObject.transform.rotation;
                 }
                 else
                 {
@@ -1985,7 +1989,10 @@ namespace DevMinecraftMod.Base
             InputDevices.GetDeviceAtXRNode(XRNode.RightHand).TryGetFeatureValue(CommonUsages.gripButton, out bool gripDown);
 
             if (p2DaC && mode == 1)
-                DestroyAllBlocks();
+            {
+                while (Instance.minecraftBlocks.Count != 0)
+                    Instance.DestroyAllBlocks();
+            }
 
             if (triggerDown && !triggerPullled)
             {
@@ -2160,8 +2167,8 @@ namespace DevMinecraftMod.Base
             {
                 selections.GetChild(i).gameObject.layer = 18;
 
-                if (!selections.GetChild(i).GetComponent<MinecraftSlotButton>())
-                    selections.GetChild(i).gameObject.AddComponent<MinecraftSlotButton>().slot = i;
+                if (!selections.GetChild(i).GetComponent<ButtonMain>())
+                    selections.GetChild(i).gameObject.AddComponent<ButtonMain>().slot = i;
 
                 selections.GetChild(i).GetComponent<Renderer>().enabled = false;
                 if (i == slot)
@@ -2179,9 +2186,9 @@ namespace DevMinecraftMod.Base
             {
                 selections.GetChild(i).gameObject.layer = 18;
 
-                if (!selections.GetChild(i).GetComponent<MinecraftSaveLoadButton>())
+                if (!selections.GetChild(i).GetComponent<ButtonRecover>())
                 {
-                    selections.GetChild(i).gameObject.AddComponent<MinecraftSaveLoadButton>().eq = selections.GetChild(i).name == "load";
+                    selections.GetChild(i).gameObject.AddComponent<ButtonRecover>().eq = selections.GetChild(i).name == "load";
                 }
 
             }
@@ -2195,8 +2202,8 @@ namespace DevMinecraftMod.Base
             {
                 selections.GetChild(i).gameObject.layer = 18;
 
-                if (!selections.GetChild(i).GetComponent<MinecraftColourSlotButton>())
-                    selections.GetChild(i).gameObject.AddComponent<MinecraftColourSlotButton>().slot = i;
+                if (!selections.GetChild(i).GetComponent<ButtonColour>())
+                    selections.GetChild(i).gameObject.AddComponent<ButtonColour>().slot = i;
 
                 selections.GetChild(i).GetComponent<Renderer>().enabled = false;
                 if (i == slot)
@@ -2219,10 +2226,10 @@ namespace DevMinecraftMod.Base
             {
                 selections.GetChild(i).gameObject.layer = 18;
 
-                if (!selections.GetChild(i).GetComponent<MinecraftColourSlotButton>())
+                if (!selections.GetChild(i).GetComponent<ButtonColour>())
                 {
-                    selections.GetChild(i).gameObject.AddComponent<MinecraftColourSlotButton>().slot = i;
-                    selections.GetChild(i).GetComponent<MinecraftColourSlotButton>().eq = true;
+                    selections.GetChild(i).gameObject.AddComponent<ButtonColour>().slot = i;
+                    selections.GetChild(i).GetComponent<ButtonColour>().eq = true;
                 }
 
                 selections.GetChild(i).GetComponent<Renderer>().enabled = false;

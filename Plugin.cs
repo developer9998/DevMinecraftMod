@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.ComponentModel;
 using BepInEx;
 using DevMinecraftMod.CI;
@@ -7,23 +8,19 @@ using DevMinecraftMod.Music;
 using Bepinject;
 using Utilla;
 using UnityEngine;
-using System.IO;
-using System.Reflection;
 
 namespace DevMinecraftMod
 {
-
     [ModdedGamemode]
     [Description("HauntedModMenu")]
     [BepInDependency("tonimacaroni.computerinterface", "1.5.2")]
     [BepInDependency("org.legoandmars.gorillatag.utilla", "1.6.5")]
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
-
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance;
 
-        public MinecraftFunction mf; // mother fucker 😲
+        public MinecraftMod mf; // mother fucker 😲
         private bool mfExists = false;
 
         public bool modFunction = true;
@@ -31,7 +28,7 @@ namespace DevMinecraftMod
         public MinecraftMusic mm;
         private bool mmExists;
 
-        public MinecraftRecoverFunction mrf;
+        public Recover mrf;
         private bool mrfExists;
 
         private bool inRoom;
@@ -76,7 +73,7 @@ namespace DevMinecraftMod
         {
             if (mf == null && !mfExists)
             {
-                mf = gameObject.AddComponent<MinecraftFunction>();
+                mf = gameObject.AddComponent<MinecraftMod>();
                 mfExists = true;
 
                 Destroy(GameObject.Find("NetworkTriggers/QuitBox").GetComponent<GorillaQuitBox>());
@@ -90,7 +87,7 @@ namespace DevMinecraftMod
 
                 if (mrf == null && !mrfExists)
                 {
-                    mrf = gameObject.AddComponent<MinecraftRecoverFunction>();
+                    mrf = gameObject.AddComponent<Recover>();
                     mrfExists = true;
                 }
 

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace DevMinecraftMod.Base
 {
     [System.Serializable]
-    public class MinecraftRecoverData
+    public class RecoverData
     {
         public List<GameObject> blocks = new List<GameObject>();
         public List<int> blockIndexs = new List<int>();

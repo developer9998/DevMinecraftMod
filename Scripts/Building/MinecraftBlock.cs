@@ -2,7 +2,7 @@
 
 namespace DevMinecraftMod.Base
 {
-    public class MinecraftBlockLink : MonoBehaviour
+    public class MinecraftBlock : MonoBehaviour
     {
         public GameObject minecraftObject;
         public Color blockColour = Color.white;

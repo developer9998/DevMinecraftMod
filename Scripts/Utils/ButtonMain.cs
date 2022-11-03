@@ -4,7 +4,7 @@ using Valve.VR;
 
 namespace DevMinecraftMod.Base
 {
-    public class MinecraftSlotButton : MonoBehaviour
+    public class ButtonMain : MonoBehaviour
     {
         public int slot;
 
@@ -39,10 +39,10 @@ namespace DevMinecraftMod.Base
                 return;
 
             GorillaTagger.Instance.StartVibration(component.isLeftHand, GorillaTagger.Instance.tapHapticStrength * 0.35f, GorillaTagger.Instance.tapHapticDuration * 0.75f);
-            GorillaTagger.Instance.offlineVRRig.tagSound.PlayOneShot(MinecraftFunction.Instance.clip, 0.75f);
+            GorillaTagger.Instance.offlineVRRig.tagSound.PlayOneShot(MinecraftMod.Instance.clip, 0.75f);
 
-            MinecraftFunction.Instance.currentBlock = slot;
-            MinecraftFunction.Instance.SetSlot(MinecraftFunction.Instance.currentBlock);
+            MinecraftMod.Instance.currentBlock = slot;
+            MinecraftMod.Instance.SetSlot(MinecraftMod.Instance.currentBlock);
 
         }
     }

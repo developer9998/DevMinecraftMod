@@ -2,7 +2,7 @@
 
 namespace DevMinecraftMod.Base
 {
-    public class MinecraftAutoDelete : MonoBehaviour
+    public class AutoDelete : MonoBehaviour
     {
         public float DestroyTime = 2;
         private float tempTime;
@@ -14,7 +14,7 @@ namespace DevMinecraftMod.Base
 
         void Update()
         {
-            if (Time.time > tempTime)
+            if (Time.time >= tempTime)
             {
                 Destroy(gameObject);
             }
