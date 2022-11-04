@@ -1107,17 +1107,17 @@ namespace DevMinecraftMod.Base
                     }
                     else if (currentBlock == 30)
                     {
-                        SetSurfaceIndex(blockColliders, 24, 24, 24, 24, 24, 24, false, false);
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
                         usedBlockEnum = Blocks.IronBlock;
                     }
                     else if (currentBlock == 31)
                     {
-                        SetSurfaceIndex(blockColliders, 24, 24, 24, 24, 24, 24, false, false);
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
                         usedBlockEnum = Blocks.GoldBlock;
                     }
                     else if (currentBlock == 32)
                     {
-                        SetSurfaceIndex(blockColliders, 24, 24, 24, 24, 24, 24, false, false);
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
                         usedBlockEnum = Blocks.RedstoneBlock;
                     }
                     else if (currentBlock == 33)
@@ -1127,12 +1127,12 @@ namespace DevMinecraftMod.Base
                     }
                     else if (currentBlock == 34)
                     {
-                        SetSurfaceIndex(blockColliders, 24, 24, 24, 24, 24, 24, false, false);
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
                         usedBlockEnum = Blocks.EmeraldBlock;
                     }
                     else if (currentBlock == 35)
                     {
-                        SetSurfaceIndex(blockColliders, 24, 24, 24, 24, 24, 24, false, false);
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
                         usedBlockEnum = Blocks.DiamondBlock;
                     }
                     else if (currentBlock == 36)
@@ -1200,18 +1200,18 @@ namespace DevMinecraftMod.Base
                     }
                     else if (currentBlock == 48)
                     {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        SetSurfaceIndex(blockColliders, 82, 82, 82, 82, 82, 82, false, false);
                         usedBlockEnum = Blocks.SlimeBlock;
                         SetTrampoline(blockColliders);
                     }
                     else if (currentBlock == 49)
                     {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 8, 8, false, false);
+                        SetSurfaceIndex(blockColliders, 81, 81, 81, 81, 81, 81, false, false);
                         usedBlockEnum = Blocks.Pumpkin;
                     }
                     else if (currentBlock == 50)
                     {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 8, 8, false, false);
+                        SetSurfaceIndex(blockColliders, 81, 81, 81, 81, 81, 81, false, false);
                         usedBlockEnum = Blocks.Jackolantern;
                     }
                     else if (currentBlock == 51)

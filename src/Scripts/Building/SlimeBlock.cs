@@ -24,8 +24,14 @@ namespace DevMinecraftMod.Base
                    
                     Player.Instance.transform.position += new Vector3(0, 0.15f, 0);
 
-                    body.AddForceAtPosition(new Vector3(0, force * 1.5f, 0), transform.position + new Vector3(0, -0.1f, 0), ForceMode.VelocityChange);
-                    body.AddForceAtPosition(new Vector3(0, force * 1.5f, 0), transform.position + new Vector3(0, -0.1f, 0), ForceMode.VelocityChange);
+                    if (body.velocity.x > 5 || body.velocity.x < -5 || body.velocity.z > 5 || body.velocity.z < -5)
+                    {
+                        body.AddForceAtPosition(new Vector3(0, force * 1.75f, 0), transform.position + new Vector3(0, -0.05f, 0), ForceMode.VelocityChange);
+                    }
+                    else
+                    {
+                        body.AddForceAtPosition(new Vector3(0, force * 0.75f, 0), transform.position + new Vector3(0, -0.1f, 0), ForceMode.VelocityChange);
+                    }
 
                     if (rand != 2)
                     {
