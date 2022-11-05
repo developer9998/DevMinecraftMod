@@ -71,9 +71,6 @@
     <Reference Include="PhotonVoice.PUN">
       <HintPath>$(GameAssemblyPath)\PhotonVoice.PUN.dll</HintPath>
     </Reference>
-	  <Reference Include="SteamVR">
-		  <HintPath>$(GameAssemblyPath)\SteamVR.dll</HintPath>
-	  </Reference>
     <Reference Include="PlayFab">
       <HintPath>$(GameAssemblyPath)\PlayFab.dll</HintPath>
     </Reference>
@@ -299,8 +296,7 @@
     <Reference Include="websocket-sharp">
       <HintPath>$(GameAssemblyPath)\websocket-sharp.dll</HintPath>
     </Reference>
-
-	  <Reference Include="Bepinject">
+	 <Reference Include="Bepinject">
 		  <HintPath>$(PluginsPath)\Bepinject-Auros\Bepinject.dll</HintPath>
 	  </Reference>
 	  <Reference Include="ComputerInterface">
@@ -312,6 +308,5 @@
 	  <Reference Include="Zenject-usage">
 		  <HintPath>$(PluginsPath)\Extenject\Zenject-usage.dll</HintPath>
 	  </Reference>
-	  
   </ItemGroup>
 </Project>

@@ -18,7 +18,7 @@ namespace DevMinecraftMod.Base
                 Rigidbody body = Player.Instance.GetComponent<Rigidbody>();
                 if (body.velocity.y <= -2.5f)
                 {
-                    float oldY = Mathf.Clamp(body.velocity.y, -12, 0);
+                    float oldY = Mathf.Clamp(body.velocity.y, -25, 0);
                     float rand = Random.Range(1, 3);
                     float force = Mathf.Clamp(oldY * -1 * 0.98f, 2, 15);
                    
@@ -26,11 +26,11 @@ namespace DevMinecraftMod.Base
 
                     if (body.velocity.x > 3.85f || body.velocity.x < -3.85f || body.velocity.z > 3.85f || body.velocity.z < -3.85f || body.velocity.y <= -7.5f)
                     {
-                        body.AddForceAtPosition(new Vector3(0, force * 1.75f, 0), transform.position + new Vector3(0, -0.05f, 0), ForceMode.VelocityChange);
+                        body.AddForceAtPosition(new Vector3(0, force * 1.75f, 0), transform.position + new Vector3(0, -0.05f, 0), ForceMode.VelocityChange); // stronger force if you're going directional
                     }
                     else
                     {
-                        body.AddForceAtPosition(new Vector3(0, force * 1.12f, 0), transform.position + new Vector3(0, -0.1f, 0), ForceMode.VelocityChange);
+                        body.AddForceAtPosition(new Vector3(0, force * 1.12f, 0), transform.position + new Vector3(0, -0.1f, 0), ForceMode.VelocityChange); // lighter force if you're going slow
                     }
 
                     if (rand != 2)

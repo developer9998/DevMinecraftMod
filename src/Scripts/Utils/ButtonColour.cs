@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using Valve.VR;
 
 namespace DevMinecraftMod.Base
 {
@@ -25,8 +24,13 @@ namespace DevMinecraftMod.Base
                 return;
             }
 
-            if (OpenVR.Overlay != null && OpenVR.Overlay.IsDashboardVisible())
-                return;
+            if (GorillaTagger.Instance.myVRRig != null)
+            {
+                if (!GorillaTagger.Instance.myVRRig.mainSkin.enabled)
+                {
+                    return;
+                }
+            }
 
             touchTime = Time.time;
 
