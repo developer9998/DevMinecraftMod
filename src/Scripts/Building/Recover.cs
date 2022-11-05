@@ -24,7 +24,7 @@ namespace DevMinecraftMod.Base
         {
             Instance = this;
 
-            location = Plugin.Instance.location + $"\\MapData.json";
+            location = Plugin.Instance.location + $"\\MapData.devmoddata";
 
             if (File.Exists(location))
                 recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));

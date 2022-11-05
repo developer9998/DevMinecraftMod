@@ -20,7 +20,7 @@ namespace DevMinecraftMod
     {
         public static Plugin Instance;
 
-        public MinecraftMod mf; // mother fucker 😲
+        public MinecraftMod mf;
         private bool mfExists = false;
 
         public bool modFunction = true;
@@ -97,7 +97,7 @@ namespace DevMinecraftMod
                 if (!Directory.Exists(location))
                     Directory.CreateDirectory(location);
 
-                dataLocation = location + $"\\OptionData.json";
+                dataLocation = location + $"\\OptionData.devmoddata";
 
                 GetSettings();
             }
