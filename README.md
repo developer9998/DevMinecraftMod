@@ -1,5 +1,5 @@
 # DevMinecraftMod
-Dev's Minecraft Mod (DevMinecraftMod) is a mod for Gorilla Tag that brings aspects from Minecraft into the game.  
+Dev's Minecraft Mod is a mod for Gorilla Tag that adds Minecraft Creative Mode to the game.
 
 ## Information
 ### Blocks
@@ -23,7 +23,12 @@ The mod doesn't just contain cool blocks, but extra features you can use that I 
 For the latest update, I posted a few guides in the release. You can find that release here: https://github.com/developer9998/DevMinecraftMod/releases/tag/v1.0.5
 
 ## Credits
-All credit goes to Mojang, Notch, and C418 for all the content used in the mod. All textures ripped from the Minecraft 1.8.9 JAR file and all sounds were recorded with additional software.
+Files ripped from the Minecraft 1.8.9 .jar file.
+| Author    | Reason |
+| ---       | ---                                |
+| Mojang    | Minecraft                          |
+| Notch     | Resources (Textures, Sounds, etc.) |
+| C418      | Music                              |
 
 ## License
 This product is not affiliated with Gorilla Tag or Another Axiom LLC and is not endorsed or otherwise sponsored by Another Axiom LLC. Portions of the materials contained herein are property of Another Axiom LLC. ©2021 Another Axiom LLC.
