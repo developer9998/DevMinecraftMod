@@ -48,19 +48,17 @@ namespace DevMinecraftMod
 
         public SaveData data = new SaveData();
 
-        private void OnEnable()
+        internal void OnEnable()
         {
-            if (mf == null)
-                mfExists = false;
+            if (mf == null) mfExists = false;
         }
 
-        private void OnDisable()
+        internal void OnDisable()
         {
-            if (mf != null)
-                mfExists = true;
+            if (mf != null) mfExists = true;
         }
 
-        void Awake()
+        internal void Awake()
         {
             Instance = this;
 
@@ -69,7 +67,7 @@ namespace DevMinecraftMod
             Zenjector.Install<MainInstaller>().OnProject();
         }
 
-        void OnGameInitialized(object sender, EventArgs e)
+        private void OnGameInitialized(object sender, EventArgs e)
         {
             if (mf == null && !mfExists)
             {
@@ -129,8 +127,7 @@ namespace DevMinecraftMod
 
             File.WriteAllText(dataLocation, JsonUtility.ToJson(data));
 
-            if (MinecraftView.Instance != null)
-                MinecraftView.Instance.UpdateScreen();
+            MinecraftView.Instance?.UpdateScreen();
         }
 
         public bool GetRoomState()

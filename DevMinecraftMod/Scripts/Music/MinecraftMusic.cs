@@ -94,8 +94,18 @@ namespace DevMinecraftMod.Music
             albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("venus"));
             albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("wet"));
 
-            buttonUnpressed = Resources.Load<Material>("objects/treeroom/materials/plastic");
-            buttonPressed = Resources.Load<Material>("objects/treeroom/materials/pressed");
+            GorillaPressableButton baseButton = null;
+            foreach (var mButton in Resources.FindObjectsOfTypeAll<ModeSelectButton>())
+            {
+                if (mButton.gameObject.name is "Casual")
+                {
+                    baseButton = mButton;
+                    break;
+                }
+            }
+
+            buttonUnpressed = baseButton.unpressedMaterial ?? null;
+            buttonPressed = baseButton.pressedMaterial ?? null;
 
             int tempInt = PlayerPrefs.GetInt("MinecraftModMusicMute", 0);
 
@@ -116,7 +126,15 @@ namespace DevMinecraftMod.Music
             buttonTextObject.transform.localRotation = Quaternion.Euler(-180, 180, -180);
             buttonTextObject.transform.localScale = new Vector3(0.02167028f, 0.02167028f, 0.9871666f);
 
-            Font utopiumFontTemp = GameObject.Find("Level/forest/lower level/UI/CodeOfConduct").GetComponent<Text>().font;
+            Font utopiumFontTemp = null;
+            foreach (var fC in Resources.FindObjectsOfTypeAll<Text>())
+            {
+                if (fC.font.name is "Utopium")
+                {
+                    utopiumFontTemp = fC.font;
+                    break;
+                }
+            }
 
             buttonTextObject.AddComponent<Canvas>();
             buttonText = buttonTextObject.AddComponent<Text>();
