@@ -1,10 +1,10 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace DevMinecraftMod.Base
 {
-    [System.Serializable]
+    [Serializable]
     public class RecoverData
     {
         public List<GameObject> blocks = new List<GameObject>();

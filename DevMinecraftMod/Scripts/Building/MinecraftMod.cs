@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,7 +7,6 @@ using UnityEngine.XR;
 using HarmonyLib;
 using Photon.Pun;
 using GorillaLocomotion;
-using System.Collections;
 
 // programmed by dev.
 // material data from me, graic, and frogrilla on the official gorilla tag modding discord
@@ -17,11 +17,14 @@ using System.Collections;
 // 11/3/2022
 // the mod is literally my second most viewed mod on github
 
+// 1/20/2023
+// wowie okay it's been a bit... but hey people are still using the mod!
+// i had no idea what a dictionary was when revamping the mod
+
 namespace DevMinecraftMod.Base
 {
     public class MinecraftMod : MonoBehaviour
     {
-
         public static MinecraftMod Instance;
 
         public List<MinecraftBlock> blockLinks = new List<MinecraftBlock>();
@@ -60,6 +63,65 @@ namespace DevMinecraftMod.Base
         private readonly List<GameObject> minecraftBlockList = new List<GameObject>();
         private readonly List<string> minecraftBlockListString = new List<string>();
 
+        public Dictionary<Blocks, SoundData> blkToSD = new Dictionary<Blocks, SoundData>()
+        {
+            {Blocks.Grass, SoundData.GenerateSoundWithData(3,"Grass") }, // Soil
+            {Blocks.Dirt, SoundData.GenerateSoundWithData(3,"Dirt") },
+            {Blocks.OakLog, SoundData.GenerateSoundWithData(3,"Log") }, // Logs
+            {Blocks.AcaciaLog, SoundData.GenerateSoundWithData(3,"Log") },
+            {Blocks.BirchLog, SoundData.GenerateSoundWithData(3,"Log") },
+            {Blocks.DarkOakLog, SoundData.GenerateSoundWithData(3,"Log") },
+            {Blocks.JungleLog, SoundData.GenerateSoundWithData(3,"Log") },
+            {Blocks.SpruceLog, SoundData.GenerateSoundWithData(3,"Log") },
+            {Blocks.AcaciaPlanks, SoundData.GenerateSoundWithData(3,"Plank") }, // Planks
+            {Blocks.BirchPlanks, SoundData.GenerateSoundWithData(3,"Plank") },
+            {Blocks.DarkOakPlanks, SoundData.GenerateSoundWithData(3,"Plank") },
+            {Blocks.JunglePlanks, SoundData.GenerateSoundWithData(3,"Plank") },
+            {Blocks.OakPlanks, SoundData.GenerateSoundWithData(3,"Plank") },
+            {Blocks.SprucePlanks, SoundData.GenerateSoundWithData(3,"Plank") },
+            {Blocks.Cobblestone, SoundData.GenerateSoundWithData(3,"Stone") }, // Stone
+            {Blocks.Stone, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.Brick, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.Wool, SoundData.GenerateSoundWithData(3,"Fabric") },
+            {Blocks.AcaciaLeaves, SoundData.GenerateSoundWithData(3,"Grass") }, // Leaves
+            {Blocks.BirchLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
+            {Blocks.DarkOakLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
+            {Blocks.JungleLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
+            {Blocks.OakLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
+            {Blocks.SpruceLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
+            {Blocks.Glass, SoundData.GenerateSoundWithData(3,"GlassPlace", 4, "GlassBreak") }, // Glass
+            {Blocks.CraftingTable, SoundData.GenerateSoundWithData(3,"Plank") }, // Details
+            {Blocks.Furnace, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.CoalOre, SoundData.GenerateSoundWithData(3,"Stone") }, // Ores
+            {Blocks.DiamondOre, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.EmeraldOre, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.GoldOre, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.IronOre, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.LapisOre, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.RedstoneOre, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.Netherrack, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.PackedIce, SoundData.GenerateSoundWithData(3,"IcePlace", 4, "GlassBreak") },
+            {Blocks.Obsidian, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.Bookshelf, SoundData.GenerateSoundWithData(3,"Plank") },
+            {Blocks.CoalBlock, SoundData.GenerateSoundWithData(3,"Stone") }, // Blocks
+            {Blocks.LapisBlock, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.IronBlock, SoundData.GenerateSoundWithData(4,"Metal") },
+            {Blocks.RedstoneBlock, SoundData.GenerateSoundWithData(4,"Metal") },
+            {Blocks.EmeraldBlock, SoundData.GenerateSoundWithData(4,"Metal") },
+            {Blocks.DiamondBlock, SoundData.GenerateSoundWithData(4,"Metal") },
+            {Blocks.StainedGlass, SoundData.GenerateSoundWithData(3,"GlassPlace", 4, "GlassBreak") },
+            {Blocks.Glowstone, SoundData.GenerateSoundWithData(3,"IcePlace", 4, "GlassBreak") },
+            {Blocks.SoulSand, SoundData.GenerateSoundWithData(3,"Sand") },
+            {Blocks.RegularIce, SoundData.GenerateSoundWithData(3,"IcePlace", 4, "GlassBreak") },
+            {Blocks.SlimeBlock, SoundData.GenerateSoundWithData(3,"SlimePlace") },
+            {Blocks.Pumpkin, SoundData.GenerateSoundWithData(3,"Log") },
+            {Blocks.Jackolantern, SoundData.GenerateSoundWithData(3,"Log") },
+            {Blocks.Melon, SoundData.GenerateSoundWithData(3,"Log") },
+            {Blocks.Bedrock, SoundData.GenerateSoundWithData(3,"Stone") },
+            {Blocks.HayBale, SoundData.GenerateSoundWithData(3,"Grass") },
+            {Blocks.Sponge, SoundData.GenerateSoundWithData(3,"Grass") },
+        };
+
         #region Place/Destroy Functions
 
         void PlaySpawnBlockAudio(Blocks block, Vector3 blockPosition)
@@ -68,162 +130,8 @@ namespace DevMinecraftMod.Base
             soundObjectTemp.transform.position = blockPosition;
             AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
 
-            switch (block)
-            {
-                case Blocks.Grass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Dirt:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.OakLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SpruceLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.BirchLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.JungleLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.AcaciaLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.DarkOakLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.OakPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SprucePlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.BirchPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.JunglePlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.AcaciaPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.DarkOakPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Cobblestone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Brick:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Stone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Wool:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.OakLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SpruceLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.BirchLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.JungleLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.AcaciaLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.DarkOakLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Glass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassPlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.CraftingTable:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Furnace:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.IronOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.GoldOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.DiamondOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.RedstoneOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.EmeraldOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.CoalOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.LapisOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Netherrack:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.PackedIce:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"IcePlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Obsidian:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Bookshelf:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.CoalBlock:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.LapisBlock:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.IronBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.GoldBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.RedstoneBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.EmeraldBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.DiamondBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.StainedGlass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassPlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Glowstone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"IcePlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SoulSand:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Sand{Random.Range(1, 3)}"), 0.2f); break;
-                case Blocks.RegularIce:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"IcePlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SlimeBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"SlimePlace{Random.Range(1, 3)}"), 0.2f); break;
-                case Blocks.Pumpkin:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Jackolantern:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Melon:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Bedrock:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.HayBale:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Sponge:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-            }
-
+            AudioClip clip = blockBundle.LoadAsset<AudioClip>($"{blkToSD[block].soundName}{Random.Range(1, blkToSD[block].soundRange)}");
+            audioSourceTemp.PlayOneShot(clip, Plugin.Instance.blockVolume);
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
             audioSourceTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 3;
         }
@@ -234,161 +142,8 @@ namespace DevMinecraftMod.Base
             soundObjectTemp.transform.position = blockPosition;
             AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
 
-            switch (block)
-            {
-                case Blocks.Grass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Dirt:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.OakLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SpruceLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.BirchLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.JungleLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.AcaciaLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.DarkOakLog:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.OakPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SprucePlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.BirchPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.JunglePlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.AcaciaPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.DarkOakPlanks:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Cobblestone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Brick:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Stone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Wool:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.OakLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SpruceLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.BirchLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.JungleLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.AcaciaLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.DarkOakLeaves:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Glass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.CraftingTable:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Furnace:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.IronOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.GoldOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.DiamondOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.RedstoneOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.EmeraldOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.CoalOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.LapisOre:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Netherrack:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.PackedIce:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Obsidian:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.Bookshelf:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.CoalBlock:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.LapisBlock:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.IronBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.GoldBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.RedstoneBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.EmeraldBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.DiamondBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.StainedGlass:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Glowstone:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.SoulSand:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"Sand{Random.Range(1, 3)}"), 0.2f); break;
-                case Blocks.RegularIce:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume);
-                    break;
-                case Blocks.SlimeBlock:
-                    audioSourceTemp.PlayOneShot(blockBundleAlt.LoadAsset<AudioClip>($"SlimePlace{Random.Range(1, 3)}"), 0.2f); break;
-                case Blocks.Pumpkin:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Jackolantern:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Melon:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Bedrock:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.HayBale:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-                case Blocks.Sponge:
-                    audioSourceTemp.PlayOneShot(blockBundle.LoadAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
-            }
-
+            AudioClip clip = blockBundle.LoadAsset<AudioClip>($"{blkToSD[block].destroySoundName}{Random.Range(1, blkToSD[block].destroyRange)}");
+            audioSourceTemp.PlayOneShot(clip, Plugin.Instance.blockVolume);
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
             audioSourceTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 3;
 

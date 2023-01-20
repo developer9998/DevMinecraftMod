@@ -18,9 +18,14 @@ namespace DevMinecraftMod.Base
         {
             Instance = this;
 
+            CheckLocations(out useNewEnding);
+        }
+
+        internal void CheckLocations(out bool shouldUseNew)
+        {
             location = Path.Combine(Plugin.Instance.location, "MapData.devmoddata");
             actedLocation = Path.Combine(Plugin.Instance.location, "MapData.json");
-            useNewEnding = File.Exists(actedLocation);
+            shouldUseNew = File.Exists(actedLocation);
 
             if (File.Exists(location)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
             else if (File.Exists(actedLocation)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
@@ -63,6 +68,7 @@ namespace DevMinecraftMod.Base
 
             MinecraftLogger.Log($"successfully saved mapdata!");
 
+            CheckLocations(out useNewEnding);
             string locationToUse = useNewEnding ? actedLocation : location;
             File.WriteAllText(locationToUse, JsonUtility.ToJson(recoverData));
 
@@ -71,6 +77,7 @@ namespace DevMinecraftMod.Base
 
         public void LoadData()
         {
+            CheckLocations(out useNewEnding);
             string locationToUse = useNewEnding ? actedLocation : location;
 
             if (!File.Exists(locationToUse))
