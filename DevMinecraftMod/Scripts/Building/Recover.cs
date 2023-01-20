@@ -1,33 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.IO;
 using UnityEngine;
 using Photon.Pun;
-using System.IO;
-using System.Reflection;
-using DevMinecraftMod.Base;
-using UnityEngine.InputSystem;
 
 namespace DevMinecraftMod.Base
 {
     public class Recover : MonoBehaviourPunCallbacks
     {
         public static Recover Instance { get; private set; }
-
         public string location;
-
+        public string actedLocation;
+        public bool doThis = true;
+        public bool useNewEnding;
         public RecoverData recoverData = new RecoverData();
 
-        public bool doThis = true;
-
-        void Start()
+        internal void Start()
         {
             Instance = this;
 
-            location = Plugin.Instance.location + $"\\MapData.devmoddata";
+            location = Path.Combine(Plugin.Instance.location, "MapData.devmoddata");
+            actedLocation = Path.Combine(Plugin.Instance.location, "MapData.json");
+            useNewEnding = File.Exists(actedLocation);
 
-            if (File.Exists(location))
-                recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+            if (File.Exists(location)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+            else if (File.Exists(actedLocation)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
         }
 
         public void SetData()
@@ -67,14 +63,17 @@ namespace DevMinecraftMod.Base
 
             MinecraftLogger.Log($"successfully saved mapdata!");
 
-            File.WriteAllText(location, JsonUtility.ToJson(recoverData));
+            string locationToUse = useNewEnding ? actedLocation : location;
+            File.WriteAllText(locationToUse, JsonUtility.ToJson(recoverData));
 
             doThis = true;
         }
 
         public void LoadData()
         {
-            if (!File.Exists(location))
+            string locationToUse = useNewEnding ? actedLocation : location;
+
+            if (!File.Exists(locationToUse))
             {
                 doThis = true;
                 return;

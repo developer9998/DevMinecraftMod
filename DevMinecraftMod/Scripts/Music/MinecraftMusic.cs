@@ -183,7 +183,7 @@ namespace DevMinecraftMod.Music
                 return;
             }
 
-            if (!Plugin.Instance.GetRoomState())
+            if (!Plugin.Instance.InRoom)
             {
                 buttonObject.SetActive(false);
 
@@ -215,21 +215,12 @@ namespace DevMinecraftMod.Music
 
                     if (alreadyPlayed && lastPlayed == song)
                     {
-                        //Debug.LogError("song already played, requesting for different song. attempt #1");
-                        song = Random.Range(0, albumTracks.Count - 1);
-                        if (alreadyPlayed && lastPlayed == song)
+                        while(lastPlayed == song)
                         {
-                            //Debug.LogError("song already played, requesting for different song. attempt #2");
                             song = Random.Range(0, albumTracks.Count - 1);
-                            if (alreadyPlayed && lastPlayed == song)
-                            {
-                                //Debug.LogError("song already played, requesting for different song. attempt #3");
-                                song = Random.Range(0, albumTracks.Count - 1);
-
-                            }
                         }
                     }
-                    else
+
                     if (alreadyPlayed && lastPlayed != song)
                     {
                         //Debug.LogError("playing a new song");

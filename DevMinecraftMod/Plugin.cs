@@ -31,7 +31,7 @@ namespace DevMinecraftMod
         public Recover mrf;
         private bool mrfExists;
 
-        private bool inRoom;
+        public bool InRoom { get; private set; }
 
         public bool sIndicatorEnabled = true;
         public bool lIndicatorEnabled = false;
@@ -89,13 +89,9 @@ namespace DevMinecraftMod
                     mrfExists = true;
                 }
 
-                location = Directory.GetCurrentDirectory();
-                location += $"\\BepInEx\\plugins\\{PluginInfo.Name}\\Data";
-
-                if (!Directory.Exists(location))
-                    Directory.CreateDirectory(location);
-
-                dataLocation = location + $"\\OptionData.devmoddata";
+                location = Path.Combine(Path.GetDirectoryName(typeof(Plugin).Assembly.Location), "MinecraftModData");
+                if (!Directory.Exists(location)) Directory.CreateDirectory(location);
+                dataLocation = Path.Combine(location, "OptionData.json");
 
                 GetSettings();
             }
@@ -126,16 +122,10 @@ namespace DevMinecraftMod
             data.totalBlocksRemoved = removed;
 
             File.WriteAllText(dataLocation, JsonUtility.ToJson(data));
-
             MinecraftView.Instance?.UpdateScreen();
         }
 
-        public bool GetRoomState()
-        {
-            return inRoom;
-        }
-
-        [ModdedGamemodeJoin] private void RoomJoinedModded() => inRoom = true;
-        [ModdedGamemodeLeave] private void RoomLeftModded() => inRoom = false;
+        [ModdedGamemodeJoin] internal void RoomJoinedModded() => InRoom = true;
+        [ModdedGamemodeLeave] internal void RoomLeftModded() => InRoom = false;
     }
 }
