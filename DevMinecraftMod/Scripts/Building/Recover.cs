@@ -42,6 +42,22 @@ namespace DevMinecraftMod.Base
             if (File.Exists(loc) && !File.Exists(location))
             {
                 File.Move(loc, location);
+
+                string locRe = Path.Combine(oldLocation, "OptionData.devmoddata");
+                string acLocRe = Path.Combine(oldLocation, "OptionData.json");
+                if (File.Exists(locRe) && File.Exists(Plugin.Instance.dataLocation))
+                {
+                    File.Delete(Plugin.Instance.dataLocation);
+                    File.Move(locRe, Plugin.Instance.dataLocation);
+                    Plugin.Instance.dataLocation = locRe;
+                }
+                else if (File.Exists(acLocRe) && File.Exists(Plugin.Instance.dataLocation))
+                {
+                    File.Delete(Plugin.Instance.dataLocation);
+                    File.Move(acLocRe, Plugin.Instance.dataLocation);
+                    Plugin.Instance.dataLocation = acLocRe;
+                }
+
                 Directory.Delete(oldLocation, true);
 
                 location = Path.Combine(Plugin.Instance.location, "MapData.devmoddata");
@@ -54,6 +70,22 @@ namespace DevMinecraftMod.Base
             else if (File.Exists(acLoc) && !File.Exists(actedLocation))
             {
                 File.Move(acLoc, actedLocation);
+
+                string locRe = Path.Combine(oldLocation, "OptionData.devmoddata");
+                string acLocRe = Path.Combine(oldLocation, "OptionData.json");
+                if (File.Exists(locRe) && File.Exists(Plugin.Instance.dataLocation))
+                {
+                    File.Delete(Plugin.Instance.dataLocation);
+                    File.Move(locRe, Plugin.Instance.dataLocation);
+                    Plugin.Instance.dataLocation = locRe;
+                }
+                else if (File.Exists(acLocRe) && File.Exists(Plugin.Instance.dataLocation))
+                {
+                    File.Delete(Plugin.Instance.dataLocation);
+                    File.Move(acLocRe, Plugin.Instance.dataLocation);
+                    Plugin.Instance.dataLocation = acLocRe;
+                }
+
                 Directory.Delete(oldLocation, true);
 
                 location = Path.Combine(Plugin.Instance.location, "MapData.devmoddata");
