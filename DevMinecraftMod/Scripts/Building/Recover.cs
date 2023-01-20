@@ -18,6 +18,11 @@ namespace DevMinecraftMod.Base
         {
             Instance = this;
 
+            Invoke(nameof(CheckLocationsDelay), 1);
+        }
+
+        internal void CheckLocationsDelay()
+        {
             CheckLocations(out useNewEnding);
         }
 
@@ -29,6 +34,35 @@ namespace DevMinecraftMod.Base
 
             if (File.Exists(location)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
             else if (File.Exists(actedLocation)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+
+            string oldLocation = Path.Combine(Path.GetDirectoryName(typeof(Plugin).Assembly.Location), "Data");
+            string loc = Path.Combine(oldLocation, "MapData.devmoddata");
+            string acLoc = Path.Combine(oldLocation, "MapData.json");
+
+            if (File.Exists(loc) && !File.Exists(location))
+            {
+                File.Move(loc, location);
+                Directory.Delete(oldLocation, true);
+
+                location = Path.Combine(Plugin.Instance.location, "MapData.devmoddata");
+                actedLocation = Path.Combine(Plugin.Instance.location, "MapData.json");
+                shouldUseNew = File.Exists(actedLocation);
+
+                if (File.Exists(location)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+                else if (File.Exists(actedLocation)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+            }
+            else if (File.Exists(acLoc) && !File.Exists(actedLocation))
+            {
+                File.Move(acLoc, actedLocation);
+                Directory.Delete(oldLocation, true);
+
+                location = Path.Combine(Plugin.Instance.location, "MapData.devmoddata");
+                actedLocation = Path.Combine(Plugin.Instance.location, "MapData.json");
+                shouldUseNew = File.Exists(actedLocation);
+
+                if (File.Exists(location)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+                else if (File.Exists(actedLocation)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+            }
         }
 
         public void SetData()

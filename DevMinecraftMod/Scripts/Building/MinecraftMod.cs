@@ -106,6 +106,7 @@ namespace DevMinecraftMod.Base
             {Blocks.CoalBlock, SoundData.GenerateSoundWithData(3,"Stone") }, // Blocks
             {Blocks.LapisBlock, SoundData.GenerateSoundWithData(3,"Stone") },
             {Blocks.IronBlock, SoundData.GenerateSoundWithData(4,"Metal") },
+            {Blocks.GoldBlock, SoundData.GenerateSoundWithData(4,"Metal") },
             {Blocks.RedstoneBlock, SoundData.GenerateSoundWithData(4,"Metal") },
             {Blocks.EmeraldBlock, SoundData.GenerateSoundWithData(4,"Metal") },
             {Blocks.DiamondBlock, SoundData.GenerateSoundWithData(4,"Metal") },
@@ -130,7 +131,7 @@ namespace DevMinecraftMod.Base
             soundObjectTemp.transform.position = blockPosition;
             AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
 
-            AudioClip clip = blockBundle.LoadAsset<AudioClip>($"{blkToSD[block].soundName}{Random.Range(1, blkToSD[block].soundRange)}");
+            AudioClip clip = blockBundle.LoadAsset<AudioClip>($"{blkToSD[block].soundName}{Random.Range(1, blkToSD[block].soundRange)}") ?? blockBundleAlt.LoadAsset<AudioClip>($"{blkToSD[block].soundName}{Random.Range(1, blkToSD[block].soundRange)}");
             audioSourceTemp.PlayOneShot(clip, Plugin.Instance.blockVolume);
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
             audioSourceTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 3;
@@ -142,7 +143,7 @@ namespace DevMinecraftMod.Base
             soundObjectTemp.transform.position = blockPosition;
             AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
 
-            AudioClip clip = blockBundle.LoadAsset<AudioClip>($"{blkToSD[block].destroySoundName}{Random.Range(1, blkToSD[block].destroyRange)}");
+            AudioClip clip = blockBundle.LoadAsset<AudioClip>($"{blkToSD[block].destroySoundName}{Random.Range(1, blkToSD[block].destroyRange)}") ?? blockBundleAlt.LoadAsset<AudioClip>($"{blkToSD[block].destroySoundName}{Random.Range(1, blkToSD[block].destroyRange)}");
             audioSourceTemp.PlayOneShot(clip, Plugin.Instance.blockVolume);
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
             audioSourceTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 3;
