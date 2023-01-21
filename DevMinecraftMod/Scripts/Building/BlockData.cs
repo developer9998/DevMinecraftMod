@@ -105,4 +105,44 @@ namespace DevMinecraftMod.Base
             return theData;
         }
     }
+
+    public class BlockPhysData
+    {
+        public bool IsBouncy;
+        public bool HasCustomColour;
+        public SurfaceData SurData;
+        public Blocks CurBlock;
+
+        public static BlockPhysData GenerateBlockDataWithData(int up, int down, int left, int right, int front, int back, bool bounce, bool hasCustomColour, Blocks block)
+        {
+            BlockPhysData theData = new BlockPhysData
+            {
+                CurBlock = block,
+                HasCustomColour = hasCustomColour,
+                IsBouncy = bounce,
+                SurData = new SurfaceData
+                {
+                    up = up,
+                    down = down,
+                    front = front,
+                    back = back,
+                    left = left,
+                    right = right
+                }
+            };
+
+            return theData;
+        }
+       
+    }
+
+    public class SurfaceData
+    {
+        public int up;
+        public int down;
+        public int left;
+        public int right;
+        public int front;
+        public int back;
+    }
 }

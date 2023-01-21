@@ -134,8 +134,7 @@ namespace DevMinecraftMod.Base
 
             MinecraftLogger.Log($"successfully saved mapdata!");
 
-            CheckLocations(out useNewEnding);
-            string locationToUse = useNewEnding ? actedLocation : location;
+            string locationToUse = !File.Exists(location) ? actedLocation : location;
             File.WriteAllText(locationToUse, JsonUtility.ToJson(recoverData));
 
             doThis = true;
@@ -143,8 +142,9 @@ namespace DevMinecraftMod.Base
 
         public void LoadData()
         {
-            CheckLocations(out useNewEnding);
-            string locationToUse = useNewEnding ? actedLocation : location;
+            if (File.Exists(location)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+            else if (File.Exists(actedLocation)) recoverData = JsonUtility.FromJson<RecoverData>(File.ReadAllText(location));
+            string locationToUse = !File.Exists(location) ? actedLocation : location;
 
             if (!File.Exists(locationToUse))
             {

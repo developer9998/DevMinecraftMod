@@ -7,6 +7,9 @@ using UnityEngine.XR;
 using HarmonyLib;
 using Photon.Pun;
 using GorillaLocomotion;
+using System.Linq;
+using System;
+using Random = UnityEngine.Random;
 
 // programmed by dev.
 // material data from me, graic, and frogrilla on the official gorilla tag modding discord
@@ -121,6 +124,66 @@ namespace DevMinecraftMod.Base
             {Blocks.Bedrock, SoundData.GenerateSoundWithData(3,"Stone") },
             {Blocks.HayBale, SoundData.GenerateSoundWithData(3,"Grass") },
             {Blocks.Sponge, SoundData.GenerateSoundWithData(3,"Grass") },
+        };
+
+        public Dictionary<int, BlockPhysData> blkToBD = new Dictionary<int, BlockPhysData>()
+        {
+            {0, BlockPhysData.GenerateBlockDataWithData(7, 14, 14, 14, 14, 14, false, false, Blocks.Grass)}, // Soil
+            {1, BlockPhysData.GenerateBlockDataWithData(14, 14, 14, 14, 14, 14, false, false, Blocks.Dirt)},
+            {2, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.OakLog)}, // Logs
+            {3, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.SpruceLog)},
+            {4, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.BirchLog)},
+            {5, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.JungleLog)},
+            {6, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.AcaciaLog)},
+            {7, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.DarkOakLog)},
+            {8, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.OakPlanks)}, // Planks
+            {9, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.SprucePlanks)},
+            {10, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.BirchPlanks)},
+            {11, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.JunglePlanks)},
+            {12, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.AcaciaPlanks)},
+            {13, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.DarkOakPlanks)},
+            {14, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.OakLeaves)}, // Leaves
+            {15, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.SpruceLeaves)},
+            {16, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.BirchLeaves)},
+            {17, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.JungleLeaves)},
+            {18, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.AcaciaLeaves)}, // Leaves
+            {19, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.DarkOakLeaves)},
+            {20, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Cobblestone)}, // Stone
+            {21, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Stone)},
+            {22, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.CoalOre)}, // Ores
+            {23, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.IronOre)},
+            {24, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.GoldOre)},
+            {25, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.RedstoneOre)},
+            {26, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.LapisOre)},
+            {27, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.EmeraldOre)},
+            {28, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.DiamondOre)},
+            {29, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.CoalBlock)}, // Block
+            {30, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.IronBlock)},
+            {31, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.GoldBlock)},
+            {32, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.RedstoneBlock)},
+            {33, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.LapisBlock)},
+            {34, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.EmeraldBlock)},
+            {35, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.DiamondBlock)},
+            {36, BlockPhysData.GenerateBlockDataWithData(106, 106, 106, 106, 106, 106, false, false, Blocks.Glass)},
+            {37, BlockPhysData.GenerateBlockDataWithData(106, 106, 106, 106, 106, 106, false, true, Blocks.StainedGlass)},
+            {38, BlockPhysData.GenerateBlockDataWithData(107, 107, 107, 107, 107, 107, false, true, Blocks.Wool)}, // Blocks
+            {39, BlockPhysData.GenerateBlockDataWithData(145, 145, 145, 145, 145, 145, false, false, Blocks.Bookshelf)},
+            {40, BlockPhysData.GenerateBlockDataWithData(145, 145, 145, 145, 145, 145, false, false, Blocks.CraftingTable)},
+            {41, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Furnace)},
+            {42, BlockPhysData.GenerateBlockDataWithData(59, 59, 59, 59, 59, 59, false, false, Blocks.RegularIce)},
+            {43, BlockPhysData.GenerateBlockDataWithData(59, 59, 59, 59, 59, 59, false, false, Blocks.PackedIce)},
+            {44, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Netherrack)},
+            {45, BlockPhysData.GenerateBlockDataWithData(88, 88, 88, 88, 88, 88, false, false, Blocks.SoulSand)},
+            {46, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Obsidian)},
+            {47, BlockPhysData.GenerateBlockDataWithData(120, 120, 120, 120, 120, 120, false, false, Blocks.Glowstone)},
+            {48, BlockPhysData.GenerateBlockDataWithData(96, 96, 96, 96, 96, 96, true, false, Blocks.SlimeBlock)},
+            {49, BlockPhysData.GenerateBlockDataWithData(81, 81, 81, 81, 81, 81, false, false, Blocks.Pumpkin)},
+            {50, BlockPhysData.GenerateBlockDataWithData(81, 81, 81, 81, 81, 81, false, false, Blocks.Jackolantern)},
+            {51, BlockPhysData.GenerateBlockDataWithData(96, 96, 96, 96, 96, 96, false, false, Blocks.Sponge)},
+            {52, BlockPhysData.GenerateBlockDataWithData(145, 145, 145, 145, 145, 145, false, false, Blocks.Melon)},
+            {53, BlockPhysData.GenerateBlockDataWithData(88, 88, 88, 88, 88, 88, false, false, Blocks.HayBale)},
+            {54, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Bedrock)},
+            {55, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Brick)},
         };
 
         #region Place/Destroy Functions
@@ -343,7 +406,10 @@ namespace DevMinecraftMod.Base
 
                 if (slippery)
                 {
-                    block.GetChild(i).gameObject.GetComponent<BoxCollider>().material = Resources.Load<PhysicMaterial>("objects/forest/materials/Slippery");
+                    PhysicMaterial slipMat = null;
+                    var iceObjects = Resources.FindObjectsOfTypeAll<GameObject>().Where(obj => obj.name == "mountainsideice");
+                    if (iceObjects.ToList().Count != 0) slipMat = iceObjects.ToList()[0].GetComponent<Collider>().material;
+                    block.GetChild(i).gameObject.GetComponent<BoxCollider>().material = slipMat ?? null;
                 }
             }
         }
@@ -448,295 +514,12 @@ namespace DevMinecraftMod.Base
                     Transform blockColliders = tempBlock.transform.GetChild(0);
                     blockColliders.GetComponent<BoxCollider>().enabled = false;
 
-                    Blocks usedBlockEnum = Blocks.Grass;
+                    var dataUsed = blkToBD[currentBlock];
+                    Blocks usedBlockEnum = dataUsed.CurBlock;
+                    SetSurfaceIndex(blockColliders, dataUsed.SurData.front, dataUsed.SurData.left, dataUsed.SurData.right, dataUsed.SurData.back, dataUsed.SurData.up, dataUsed.SurData.down, dataUsed.HasCustomColour, Player.Instance.materialData[currentBlock].slidePercent >= 0.1f);
+                    if (dataUsed.IsBouncy) SetTrampoline(blockColliders);
 
-                    if (currentBlock == 0)
-                    {
-                        SetSurfaceIndex(blockColliders, 14, 14, 14, 14, 7, 14, false, false);
-                    }
-                    else if (currentBlock == 1)
-                    {
-                        SetSurfaceIndex(blockColliders, 14, 14, 14, 14, 14, 14, false, false);
-                        usedBlockEnum = Blocks.Dirt;
-                    }
-                    else if (currentBlock == 2)
-                    {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
-                        usedBlockEnum = Blocks.OakLog;
-                    }
-                    else if (currentBlock == 3)
-                    {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
-                        usedBlockEnum = Blocks.SpruceLog;
-                    }
-                    else if (currentBlock == 4)
-                    {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
-                        usedBlockEnum = Blocks.BirchLog;
-                    }
-                    else if (currentBlock == 5)
-                    {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
-                        usedBlockEnum = Blocks.JungleLog;
-                    }
-                    else if (currentBlock == 6)
-                    {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
-                        usedBlockEnum = Blocks.AcaciaLog;
-                    }
-                    else if (currentBlock == 7)
-                    {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
-                        usedBlockEnum = Blocks.DarkOakLog;
-                    }
-                    else if (currentBlock == 8)
-                    {
-                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
-                        usedBlockEnum = Blocks.OakPlanks;
-                    }
-                    else if (currentBlock == 9)
-                    {
-                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
-                        usedBlockEnum = Blocks.SprucePlanks;
-                    }
-                    else if (currentBlock == 10)
-                    {
-                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
-                        usedBlockEnum = Blocks.BirchPlanks;
-                    }
-                    else if (currentBlock == 11)
-                    {
-                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
-                        usedBlockEnum = Blocks.JunglePlanks;
-                    }
-                    else if (currentBlock == 12)
-                    {
-                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
-                        usedBlockEnum = Blocks.AcaciaPlanks;
-                    }
-                    else if (currentBlock == 13)
-                    {
-                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
-                        usedBlockEnum = Blocks.DarkOakPlanks;
-                    }
-                    else if (currentBlock == 14)
-                    {
-                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
-                        usedBlockEnum = Blocks.OakLeaves;
-                    }
-                    else if (currentBlock == 15)
-                    {
-                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
-                        usedBlockEnum = Blocks.SpruceLeaves;
-                    }
-                    else if (currentBlock == 16)
-                    {
-                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
-                        usedBlockEnum = Blocks.BirchLeaves;
-                    }
-                    else if (currentBlock == 17)
-                    {
-                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
-                        usedBlockEnum = Blocks.JungleLeaves;
-                    }
-                    else if (currentBlock == 18)
-                    {
-                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
-                        usedBlockEnum = Blocks.AcaciaLeaves;
-                    }
-                    else if (currentBlock == 19)
-                    {
-                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
-                        usedBlockEnum = Blocks.DarkOakLeaves;
-                    }
-                    else if (currentBlock == 20)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.Cobblestone;
-                    }
-                    else if (currentBlock == 21)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.Stone;
-                    }
-                    else if (currentBlock == 22)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.CoalOre;
-                    }
-                    else if (currentBlock == 23)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.IronOre;
-                    }
-                    else if (currentBlock == 24)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.GoldOre;
-                    }
-                    else if (currentBlock == 25)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.RedstoneOre;
-                    }
-                    else if (currentBlock == 26)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.LapisOre;
-                    }
-                    else if (currentBlock == 27)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.EmeraldOre;
-                    }
-                    else if (currentBlock == 28)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.DiamondOre;
-                    }
-                    else if (currentBlock == 29)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.CoalBlock;
-                    }
-                    else if (currentBlock == 30)
-                    {
-                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
-                        usedBlockEnum = Blocks.IronBlock;
-                    }
-                    else if (currentBlock == 31)
-                    {
-                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
-                        usedBlockEnum = Blocks.GoldBlock;
-                    }
-                    else if (currentBlock == 32)
-                    {
-                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
-                        usedBlockEnum = Blocks.RedstoneBlock;
-                    }
-                    else if (currentBlock == 33)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.LapisBlock;
-                    }
-                    else if (currentBlock == 34)
-                    {
-                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
-                        usedBlockEnum = Blocks.EmeraldBlock;
-                    }
-                    else if (currentBlock == 35)
-                    {
-                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
-                        usedBlockEnum = Blocks.DiamondBlock;
-                    }
-                    else if (currentBlock == 36)
-                    {
-                        SetSurfaceIndex(blockColliders, 55, 55, 55, 55, 55, 55, false, false);
-                        usedBlockEnum = Blocks.Glass;
-                    }
-                    else if (currentBlock == 37)
-                    {
-                        SetSurfaceIndex(blockColliders, 55, 55, 55, 55, 55, 55, true, false);
-                        usedBlockEnum = Blocks.StainedGlass;
-                    }
-                    else if (currentBlock == 38)
-                    {
-                        SetSurfaceIndex(blockColliders, 3, 3, 3, 3, 3, 3, true, false);
-                        usedBlockEnum = Blocks.Wool;
-                    }
-                    else if (currentBlock == 39)
-                    {
-                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
-                        usedBlockEnum = Blocks.Bookshelf;
-                    }
-                    else if (currentBlock == 40)
-                    {
-                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
-                        usedBlockEnum = Blocks.CraftingTable;
-                    }
-                    else if (currentBlock == 41)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.Furnace;
-                    }
-                    else if (currentBlock == 42)
-                    {
-                        SetSurfaceIndex(blockColliders, 59, 59, 59, 59, 59, 59, false, true);
-                        usedBlockEnum = Blocks.RegularIce;
-                    }
-                    else if (currentBlock == 43)
-                    {
-                        SetSurfaceIndex(blockColliders, 59, 59, 59, 59, 59, 59, false, true);
-                        usedBlockEnum = Blocks.PackedIce;
-                    }
-                    else if (currentBlock == 44)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-
-                        usedBlockEnum = Blocks.Netherrack;
-                    }
-                    else if (currentBlock == 45)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-
-                        usedBlockEnum = Blocks.SoulSand;
-                    }
-                    else if (currentBlock == 46)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-
-                        usedBlockEnum = Blocks.Obsidian;
-                    }
-                    else if (currentBlock == 47)
-                    {
-                        SetSurfaceIndex(blockColliders, 55, 55, 55, 55, 55, 55, false, false);
-                        usedBlockEnum = Blocks.Glowstone;
-                    }
-                    else if (currentBlock == 48)
-                    {
-                        SetSurfaceIndex(blockColliders, 82, 82, 82, 82, 82, 82, false, false);
-                        usedBlockEnum = Blocks.SlimeBlock;
-                        SetTrampoline(blockColliders);
-                    }
-                    else if (currentBlock == 49)
-                    {
-                        SetSurfaceIndex(blockColliders, 81, 81, 81, 81, 81, 81, false, false);
-                        usedBlockEnum = Blocks.Pumpkin;
-                    }
-                    else if (currentBlock == 50)
-                    {
-                        SetSurfaceIndex(blockColliders, 81, 81, 81, 81, 81, 81, false, false);
-                        usedBlockEnum = Blocks.Jackolantern;
-                    }
-                    else if (currentBlock == 51)
-                    {
-                        SetSurfaceIndex(blockColliders, 7, 7, 7, 7, 7, 7, false, false);
-                        usedBlockEnum = Blocks.Sponge;
-                    }
-                    else if (currentBlock == 52)
-                    {
-                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 8, 8, false, false);
-                        usedBlockEnum = Blocks.Melon;
-                    }
-                    else if (currentBlock == 53)
-                    {
-                        SetSurfaceIndex(blockColliders, 7, 7, 7, 7, 7, 7, false, false);
-                        usedBlockEnum = Blocks.HayBale;
-                    }
-                    else if (currentBlock == 54)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.Bedrock;
-                    }
-                    else if (currentBlock == 55)
-                    {
-                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
-                        usedBlockEnum = Blocks.Brick;
-                    }
-
-                    BoxCollider[] boxColliders = tempBlock.transform.GetComponentsInChildren<BoxCollider>();
-
-                    foreach (BoxCollider bx in boxColliders)
+                    foreach (BoxCollider bx in tempBlock.transform.GetComponentsInChildren<BoxCollider>(false))
                     {
                         bx.enabled = true;
                         bx.gameObject.layer = 0;
@@ -749,9 +532,7 @@ namespace DevMinecraftMod.Base
                         Color col = colours[ccm];
 
                         bl.blockIndex = currentBlock;
-
-                        if (currentBlock == 37 || currentBlock == 38)
-                            bl.blockColour = col;
+                        if (dataUsed.HasCustomColour) bl.blockColour = col;
 
                         bl.block = usedBlockEnum;
 
@@ -785,291 +566,10 @@ namespace DevMinecraftMod.Base
             Transform blockColliders = tempBlock.transform.GetChild(0);
             blockColliders.GetComponent<BoxCollider>().enabled = false;
 
-            Blocks usedBlockEnum = Blocks.Grass;
-
-            if (blockIndex == 0)
-            {
-                SetSurfaceIndexOther(blockColliders, 14, 14, 14, 14, 7, 14, false, false, blockColour);
-            }
-            else if (blockIndex == 1)
-            {
-                SetSurfaceIndexOther(blockColliders, 14, 14, 14, 14, 14, 14, false, false, blockColour);
-                usedBlockEnum = Blocks.Dirt;
-            }
-            else if (blockIndex == 2)
-            {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.OakLog;
-            }
-            else if (blockIndex == 3)
-            {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.SpruceLog;
-            }
-            else if (blockIndex == 4)
-            {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.BirchLog;
-            }
-            else if (blockIndex == 5)
-            {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.JungleLog;
-            }
-            else if (blockIndex == 6)
-            {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.AcaciaLog;
-            }
-            else if (blockIndex == 7)
-            {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.DarkOakLog;
-            }
-            else if (blockIndex == 8)
-            {
-                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.OakPlanks;
-            }
-            else if (blockIndex == 9)
-            {
-                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.SprucePlanks;
-            }
-            else if (blockIndex == 10)
-            {
-                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.BirchPlanks;
-            }
-            else if (blockIndex == 11)
-            {
-                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.JunglePlanks;
-            }
-            else if (blockIndex == 12)
-            {
-                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.AcaciaPlanks;
-            }
-            else if (blockIndex == 13)
-            {
-                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.DarkOakPlanks;
-            }
-            else if (blockIndex == 14)
-            {
-                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
-                usedBlockEnum = Blocks.OakLeaves;
-            }
-            else if (blockIndex == 15)
-            {
-                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
-                usedBlockEnum = Blocks.SpruceLeaves;
-            }
-            else if (blockIndex == 16)
-            {
-                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
-                usedBlockEnum = Blocks.BirchLeaves;
-            }
-            else if (blockIndex == 17)
-            {
-                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
-                usedBlockEnum = Blocks.JungleLeaves;
-            }
-            else if (blockIndex == 18)
-            {
-                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
-                usedBlockEnum = Blocks.AcaciaLeaves;
-            }
-            else if (blockIndex == 19)
-            {
-                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
-                usedBlockEnum = Blocks.DarkOakLeaves;
-            }
-            else if (blockIndex == 20)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.Cobblestone;
-            }
-            else if (blockIndex == 21)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.Stone;
-            }
-            else if (blockIndex == 22)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.CoalOre;
-            }
-            else if (blockIndex == 23)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.IronOre;
-            }
-            else if (blockIndex == 24)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.GoldOre;
-            }
-            else if (blockIndex == 25)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.RedstoneOre;
-            }
-            else if (blockIndex == 26)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.LapisOre;
-            }
-            else if (blockIndex == 27)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.EmeraldOre;
-            }
-            else if (blockIndex == 28)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.DiamondOre;
-            }
-            else if (blockIndex == 29)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.CoalBlock;
-            }
-            else if (blockIndex == 30)
-            {
-                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
-                usedBlockEnum = Blocks.IronBlock;
-            }
-            else if (blockIndex == 31)
-            {
-                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
-                usedBlockEnum = Blocks.GoldBlock;
-            }
-            else if (blockIndex == 32)
-            {
-                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
-                usedBlockEnum = Blocks.RedstoneBlock;
-            }
-            else if (blockIndex == 33)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.LapisBlock;
-            }
-            else if (blockIndex == 34)
-            {
-                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
-                usedBlockEnum = Blocks.EmeraldBlock;
-            }
-            else if (blockIndex == 35)
-            {
-                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
-                usedBlockEnum = Blocks.DiamondBlock;
-            }
-            else if (blockIndex == 36)
-            {
-                SetSurfaceIndexOther(blockColliders, 55, 55, 55, 55, 55, 55, false, false, blockColour);
-                usedBlockEnum = Blocks.Glass;
-            }
-            else if (blockIndex == 37)
-            {
-                SetSurfaceIndexOther(blockColliders, 55, 55, 55, 55, 55, 55, true, false, blockColour);
-                usedBlockEnum = Blocks.StainedGlass;
-            }
-            else if (blockIndex == 38)
-            {
-                SetSurfaceIndexOther(blockColliders, 3, 3, 3, 3, 3, 3, true, false, blockColour);
-                usedBlockEnum = Blocks.Wool;
-            }
-            else if (blockIndex == 39)
-            {
-                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.Bookshelf;
-            }
-            else if (blockIndex == 40)
-            {
-                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
-                usedBlockEnum = Blocks.CraftingTable;
-            }
-            else if (blockIndex == 41)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.Furnace;
-            }
-            else if (blockIndex == 42)
-            {
-                SetSurfaceIndexOther(blockColliders, 59, 59, 59, 59, 59, 59, false, true, blockColour);
-                usedBlockEnum = Blocks.RegularIce;
-            }
-            else if (blockIndex == 43)
-            {
-                SetSurfaceIndexOther(blockColliders, 59, 59, 59, 59, 59, 59, false, true, blockColour);
-                usedBlockEnum = Blocks.PackedIce;
-            }
-            else if (blockIndex == 44)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-
-                usedBlockEnum = Blocks.Netherrack;
-            }
-            else if (blockIndex == 45)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-
-                usedBlockEnum = Blocks.SoulSand;
-            }
-            else if (blockIndex == 46)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-
-                usedBlockEnum = Blocks.Obsidian;
-            }
-            else if (blockIndex == 47)
-            {
-                SetSurfaceIndexOther(blockColliders, 55, 55, 55, 55, 55, 55, false, false, blockColour);
-                usedBlockEnum = Blocks.Glowstone;
-            }
-            else if (blockIndex == 48)
-            {
-                SetSurfaceIndexOther(blockColliders, 82, 82, 82, 82, 82, 82, false, false, blockColour);
-                usedBlockEnum = Blocks.SlimeBlock;
-                SetTrampoline(blockColliders);
-            }
-            else if (blockIndex == 49)
-            {
-                SetSurfaceIndexOther(blockColliders, 81, 81, 81, 81, 81, 81, false, false, blockColour);
-                usedBlockEnum = Blocks.Pumpkin;
-            }
-            else if (blockIndex == 50)
-            {
-                SetSurfaceIndexOther(blockColliders, 81, 81, 81, 81, 81, 81, false, false, blockColour);
-                usedBlockEnum = Blocks.Jackolantern;
-            }
-            else if (blockIndex == 51)
-            {
-                SetSurfaceIndexOther(blockColliders, 7, 7, 7, 7, 7, 7, false, false, blockColour);
-                usedBlockEnum = Blocks.Sponge;
-            }
-            else if (blockIndex == 52)
-            {
-                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 8, 8, false, false, blockColour);
-                usedBlockEnum = Blocks.Melon;
-            }
-            else if (blockIndex == 53)
-            {
-                SetSurfaceIndexOther(blockColliders, 7, 7, 7, 7, 7, 7, false, false, blockColour);
-                usedBlockEnum = Blocks.HayBale;
-            }
-            else if (blockIndex == 54)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.Bedrock;
-            }
-            else if (blockIndex == 55)
-            {
-                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
-                usedBlockEnum = Blocks.Brick;
-            }
+            var dataUsed = blkToBD[blockIndex];
+            Blocks usedBlockEnum = dataUsed.CurBlock;
+            SetSurfaceIndexOther(blockColliders, dataUsed.SurData.front, dataUsed.SurData.left, dataUsed.SurData.right, dataUsed.SurData.back, dataUsed.SurData.up, dataUsed.SurData.down, dataUsed.HasCustomColour, Player.Instance.materialData[currentBlock].slidePercent >= 0.1f, blockColour);
+            if (dataUsed.IsBouncy) SetTrampoline(blockColliders);
 
             BoxCollider[] boxColliders = tempBlock.transform.GetComponentsInChildren<BoxCollider>();
 
@@ -1085,10 +585,7 @@ namespace DevMinecraftMod.Base
                 bl.blockColour = Color.white;
                 bl.blockIndex = blockIndex;
 
-                if (blockIndex == 37 || blockIndex == 38)
-                {
-                    bl.blockColour = blockColour;
-                }
+                if (dataUsed.HasCustomColour) bl.blockColour = blockColour;
 
                 bl.block = usedBlockEnum;
 
@@ -1143,6 +640,7 @@ namespace DevMinecraftMod.Base
 
             blockBundle = AssetBundle.LoadFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("DevMinecraftMod.Resources.devminecraft"));
             blockBundleAlt = AssetBundle.LoadFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("DevMinecraftMod.Resources.devminecraftblock"));
+            AssetBundle extraBundle = AssetBundle.LoadFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("DevMinecraftMod.Resources.extrablockresource"));
 
             if (harmony == null)
             {
@@ -1150,9 +648,15 @@ namespace DevMinecraftMod.Base
                 harmony.PatchAll();
             }
 
+            objectStorage = new GameObject();
+            objectStorage.transform.position = Vector3.zero;
+            objectStorage.transform.rotation = Quaternion.identity;
+            objectStorage.transform.localScale = Vector3.one;
+            objectStorage.name = "DevMinecraftModStorage";
+
             AddBlocks(blockBundle, "Grass");
-            AddBlocks(blockBundle, "Dirt");
-            AddBlocks(blockBundle, "Log");
+            AddBlocks(extraBundle, "Dirt");
+            AddBlocks(extraBundle, "OakLog");
             AddBlocks(blockBundleAlt, "LogSpruce");
             AddBlocks(blockBundleAlt, "LogBirch");
             AddBlocks(blockBundleAlt, "LogJungle");
@@ -1209,12 +713,6 @@ namespace DevMinecraftMod.Base
 
             // ADDING BLOCKS
             // fire the "AddBlocks" function with the block name and assetbundle, add the blocks particles, surface index, and sounds
-
-            objectStorage = new GameObject();
-            objectStorage.transform.position = Vector3.zero;
-            objectStorage.transform.rotation = Quaternion.identity;
-            objectStorage.transform.localScale = Vector3.one;
-            objectStorage.name = "DevMinecraftModStorage";
 
             objectStorageBlock = new GameObject();
             objectStorageBlock.transform.position = Vector3.zero;
@@ -1588,69 +1086,78 @@ namespace DevMinecraftMod.Base
 
         void AddBlocks(AssetBundle bundle, string blockName)
         {
-            GameObject objec = bundle.LoadAsset<GameObject>(blockName);
-            minecraftBlockList.Add(objec);
+            try
+            {
+                GameObject objec = Instantiate(bundle.LoadAsset<GameObject>(blockName));
+                minecraftBlockList.Add(objec);
+                objec.transform.SetParent(objectStorage.transform);
+                objec.transform.localPosition = Vector3.zero;
 
-            string blockNameFinal = blockName
+                string blockNameFinal = blockName
 
-                .Replace("CraftingTable", "Crafting Table")
+                    .Replace("CraftingTable", "Crafting Table")
 
-                .Replace("IronOre", "Iron Ore")
-                .Replace("GoldOre", "Gold Ore")
+                    .Replace("IronOre", "Iron Ore")
+                    .Replace("GoldOre", "Gold Ore")
 
-                .Replace("PackedIce", "Packed Ice")
+                    .Replace("PackedIce", "Packed Ice")
 
-                .Replace("Plank", "Oak Planks")
+                    .Replace("Plank", "Oak Planks")
 
-                .Replace("Log", "Oak Log")
+                    .Replace("Log", "Oak Log")
 
-                .Replace("Obisdian", "Obsidian")
+                    .Replace("Obisdian", "Obsidian")
 
-                .Replace("Leaves", "Oak Leaves")
+                    .Replace("Leaves", "Oak Leaves")
 
-                .Replace("Brick", "Bricks")
+                    .Replace("Brick", "Bricks")
 
-                .Replace("Oak LogSpruce", "Spruce Log")
-                .Replace("Oak LogBirch", "Birch Log")
-                .Replace("Oak LogJungle", "Jungle Log")
-                .Replace("Oak LogAcacia", "Acacia Log")
-                .Replace("Oak LogDark", "Dark Oak Log")
+                    .Replace("Oak LogSpruce", "Spruce Log")
+                    .Replace("Oak LogBirch", "Birch Log")
+                    .Replace("Oak LogJungle", "Jungle Log")
+                    .Replace("Oak LogAcacia", "Acacia Log")
+                    .Replace("Oak LogDark", "Dark Oak Log")
 
-                .Replace("Oak PlanksSpruce", "Spruce Planks")
-                .Replace("Oak PlanksBirch", "Birch Planks")
-                .Replace("Oak PlanksJungle", "Jungle Planks")
-                .Replace("Oak PlanksAcacia", "Acacia Planks")
-                .Replace("Oak PlanksDark", "Dark Oak Planks")
-                .Replace("Oak LeavesSpruce", "Spruce Leaves")
-                .Replace("Oak LeavesBirch", "Birch Leaves")
-                .Replace("Oak LeavesJungle", "Jungle Leaves")
-                .Replace("Oak LeavesAcacia", "Acacia Leaves")
-                .Replace("Oak LeavesDark", "Dark Oak Leaves")
+                    .Replace("Oak PlanksSpruce", "Spruce Planks")
+                    .Replace("Oak PlanksBirch", "Birch Planks")
+                    .Replace("Oak PlanksJungle", "Jungle Planks")
+                    .Replace("Oak PlanksAcacia", "Acacia Planks")
+                    .Replace("Oak PlanksDark", "Dark Oak Planks")
+                    .Replace("Oak LeavesSpruce", "Spruce Leaves")
+                    .Replace("Oak LeavesBirch", "Birch Leaves")
+                    .Replace("Oak LeavesJungle", "Jungle Leaves")
+                    .Replace("Oak LeavesAcacia", "Acacia Leaves")
+                    .Replace("Oak LeavesDark", "Dark Oak Leaves")
 
-                .Replace("CoalOre", "Coal Ore")
-                .Replace("IronOre", "Iron Ore")
-                .Replace("GoldOre", "Gold Ore")
-                .Replace("RedstoneOre", "Redstone Ore")
-                .Replace("LapisOre", "Lapis Lazuli Ore")
-                .Replace("EmeraldOre", "Emerald Ore")
-                .Replace("DiamondOre", "Diamond Ore")
+                    .Replace("CoalOre", "Coal Ore")
+                    .Replace("IronOre", "Iron Ore")
+                    .Replace("GoldOre", "Gold Ore")
+                    .Replace("RedstoneOre", "Redstone Ore")
+                    .Replace("LapisOre", "Lapis Lazuli Ore")
+                    .Replace("EmeraldOre", "Emerald Ore")
+                    .Replace("DiamondOre", "Diamond Ore")
 
-                .Replace("CoalBlock", "Block of Coal")
-                .Replace("IronBlock", "Block of Iron")
-                .Replace("GoldBlock", "Block of Gold")
-                .Replace("RedstoneBlock", "Block of Redstone")
-                .Replace("LapisBlock", "Lapis Lazuli Block")
-                .Replace("EmeraldBlock", "Block of Emerald")
-                .Replace("DiamondBlock", "Block of Diamomd")
+                    .Replace("CoalBlock", "Block of Coal")
+                    .Replace("IronBlock", "Block of Iron")
+                    .Replace("GoldBlock", "Block of Gold")
+                    .Replace("RedstoneBlock", "Block of Redstone")
+                    .Replace("LapisBlock", "Lapis Lazuli Block")
+                    .Replace("EmeraldBlock", "Block of Emerald")
+                    .Replace("DiamondBlock", "Block of Diamomd")
 
-                .Replace("StainGlass", "Stained Glass")
-                .Replace("RegularIce", "Ice")
-                .Replace("SoulSand", "Soul Sand")
+                    .Replace("StainGlass", "Stained Glass")
+                    .Replace("RegularIce", "Ice")
+                    .Replace("SoulSand", "Soul Sand")
 
-                .Replace("SlimeBlock", "Slime Block")
-                .Replace("PumpkinOn", "Jack o'Lantern");
+                    .Replace("SlimeBlock", "Slime Block")
+                    .Replace("PumpkinOn", "Jack o'Lantern");
 
-            minecraftBlockListString.Add(blockNameFinal);
+                minecraftBlockListString.Add(blockNameFinal);
+            }
+            catch
+            {
+                Console.WriteLine("issue with " + blockName);
+            }
         }
 
         public void SetSlot(int slot)
