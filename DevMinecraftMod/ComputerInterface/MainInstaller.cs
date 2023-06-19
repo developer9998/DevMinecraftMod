@@ -1,13 +1,13 @@
 ﻿using ComputerInterface.Interfaces;
 using Zenject;
 
-namespace DevMinecraftMod.CI
+namespace DevMinecraftMod.ComputerInterface
 {
-	internal class MainInstaller : Installer
-	{
-		public override void InstallBindings()
-		{
-			Container.Bind<IComputerModEntry>().To<MinecraftEnter>().AsSingle();
-		}
-	}
+    internal class MainInstaller : Installer
+    {
+        public override void InstallBindings()
+        {
+            Container.Bind<IComputerModEntry>().To<MinecraftEnter>().AsSingle();
+        }
+    }
 }

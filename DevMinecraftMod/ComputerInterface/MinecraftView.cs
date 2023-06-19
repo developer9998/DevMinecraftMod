@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using ComputerInterface;
+﻿using ComputerInterface;
 using ComputerInterface.ViewLib;
-using DevMinecraftMod.Music;
+using UnityEngine;
 
-namespace DevMinecraftMod.CI
+namespace DevMinecraftMod.ComputerInterface
 {
     public class MinecraftView : ComputerView
     {

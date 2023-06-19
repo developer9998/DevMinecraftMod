@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using GorillaLocomotion;
+﻿using GorillaLocomotion;
 using HarmonyLib;
+using UnityEngine;
 
-namespace DevMinecraftMod.Base
+namespace DevMinecraftMod.Scripts
 {
     public class MinecraftQuitBox : GorillaTriggerBox
     {
@@ -20,8 +20,8 @@ namespace DevMinecraftMod.Base
             Traverse.Create(Player.Instance).Field("lastRightHandPosition").SetValue(target);
             Traverse.Create(Player.Instance).Field("lastHeadPosition").SetValue(target);
 
-            Player.Instance.leftHandTransform.position = target;
-            Player.Instance.rightHandTransform.position = target;
+            Player.Instance.leftControllerTransform.position = target;
+            Player.Instance.rightControllerTransform.position = target;
             Player.Instance.bodyCollider.attachedRigidbody.transform.position = target;
 
             Player.Instance.GetComponent<Rigidbody>().position = target;

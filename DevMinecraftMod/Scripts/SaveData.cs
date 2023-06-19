@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DevMinecraftMod.Base
+﻿namespace DevMinecraftMod.Scripts
 {
     [System.Serializable]
     public class SaveData

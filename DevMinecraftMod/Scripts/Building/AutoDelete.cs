@@ -1,15 +1,23 @@
 ﻿using UnityEngine;
 
-namespace DevMinecraftMod.Base
+namespace DevMinecraftMod.Scripts.Building
 {
     public class AutoDelete : MonoBehaviour
     {
         public float DestroyTime = 2;
+        private float tempTime;
 
-        public void Update()
+        void Start()
         {
-            DestroyTime -= Time.deltaTime;
-            if (DestroyTime <= 0) Destroy(gameObject);
+            tempTime = Time.time + DestroyTime;
+        }
+
+        void Update()
+        {
+            if (Time.time >= tempTime)
+            {
+                Destroy(gameObject);
+            }
         }
     }
 }

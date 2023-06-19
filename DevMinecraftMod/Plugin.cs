@@ -1,13 +1,14 @@
-﻿using System;
-using System.IO;
-using System.ComponentModel;
-using BepInEx;
-using DevMinecraftMod.CI;
-using DevMinecraftMod.Base;
-using DevMinecraftMod.Music;
+﻿using BepInEx;
 using Bepinject;
-using Utilla;
+using DevMinecraftMod.ComputerInterface;
+using DevMinecraftMod.Scripts;
+using DevMinecraftMod.Scripts.Building;
+using DevMinecraftMod.Scripts.Music;
+using System;
+using System.ComponentModel;
+using System.IO;
 using UnityEngine;
+using Utilla;
 
 namespace DevMinecraftMod
 {
@@ -31,7 +32,7 @@ namespace DevMinecraftMod
         public Recover mrf;
         private bool mrfExists;
 
-        public bool InRoom { get; private set; }
+        private bool inRoom;
 
         public bool sIndicatorEnabled = true;
         public bool lIndicatorEnabled = false;
@@ -89,9 +90,13 @@ namespace DevMinecraftMod
                     mrfExists = true;
                 }
 
-                location = Path.Combine(Path.GetDirectoryName(typeof(Plugin).Assembly.Location), "MinecraftModData");
-                if (!Directory.Exists(location)) Directory.CreateDirectory(location);
-                dataLocation = Path.Combine(location, "OptionData.json");
+                location = Directory.GetCurrentDirectory();
+                location += $"\\BepInEx\\plugins\\{PluginInfo.Name}\\Data";
+
+                if (!Directory.Exists(location))
+                    Directory.CreateDirectory(location);
+
+                dataLocation = location + $"\\OptionData.devmoddata";
 
                 GetSettings();
             }
@@ -122,10 +127,16 @@ namespace DevMinecraftMod
             data.totalBlocksRemoved = removed;
 
             File.WriteAllText(dataLocation, JsonUtility.ToJson(data));
+
             MinecraftView.Instance?.UpdateScreen();
         }
 
-        [ModdedGamemodeJoin] internal void RoomJoinedModded() => InRoom = true;
-        [ModdedGamemodeLeave] internal void RoomLeftModded() => InRoom = false;
+        public bool GetRoomState()
+        {
+            return inRoom;
+        }
+
+        [ModdedGamemodeJoin] private void RoomJoinedModded() => inRoom = true;
+        [ModdedGamemodeLeave] private void RoomLeftModded() => inRoom = false;
     }
 }

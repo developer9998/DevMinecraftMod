@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using DevMinecraftMod.Scripts.Building;
+using UnityEngine;
 using UnityEngine.UI;
 
-namespace DevMinecraftMod.Base
+namespace DevMinecraftMod.Scripts.Utils
 {
     public class ButtonColour : MonoBehaviour
     {

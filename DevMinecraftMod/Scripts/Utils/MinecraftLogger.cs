@@ -1,8 +1,8 @@
 ﻿using System;
 using UnityEngine;
 
-namespace DevMinecraftMod.Base
-{ 
+namespace DevMinecraftMod.Scripts.Utils
+{
     public class MinecraftLogger : MonoBehaviour
     {
         public static void Log(string message)

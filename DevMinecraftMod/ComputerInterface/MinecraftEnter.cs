@@ -1,7 +1,7 @@
-﻿using System;
-using ComputerInterface.Interfaces;
+﻿using ComputerInterface.Interfaces;
+using System;
 
-namespace DevMinecraftMod.CI
+namespace DevMinecraftMod.ComputerInterface
 {
     public class MinecraftEnter : IComputerModEntry
     {

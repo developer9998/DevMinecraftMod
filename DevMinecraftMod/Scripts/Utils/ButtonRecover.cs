@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using DevMinecraftMod.Scripts.Building;
+using UnityEngine;
 
-namespace DevMinecraftMod.Base
+namespace DevMinecraftMod.Scripts.Utils
 {
     public class ButtonRecover : MonoBehaviour
     {

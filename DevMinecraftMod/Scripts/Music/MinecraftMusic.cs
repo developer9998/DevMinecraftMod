@@ -1,15 +1,18 @@
-﻿using System.IO;
-using System.Reflection;
+﻿using DevMinecraftMod.Scripts.Building;
+using Photon.Pun;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using Photon.Pun;
 
-namespace DevMinecraftMod.Music
+namespace DevMinecraftMod.Scripts.Music
 {
     public class MinecraftMusic : MonoBehaviour
     {
-        public static MinecraftMusic Instance;
+        public static MinecraftMusic Instance { get; private set; }
+        public AssetBundle MainResourceBundle { get; private set; }
 
         private GameObject buttonObject;
 
@@ -77,22 +80,21 @@ namespace DevMinecraftMod.Music
             return tempButton;
         }
 
-        void Start()
+        async void Start()
         {
-            Stream manifestResourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("DevMinecraftMod.Resources.devminecraftmusic");
-            AssetBundle remoteAssetBundle = AssetBundle.LoadFromStream(manifestResourceStream);
-
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("city"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("clark"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("dry"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("hag"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("key"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("mice"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("minecraft"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("subwoofer"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("sweden"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("venus"));
-            albumTracks.Add(remoteAssetBundle.LoadAsset<AudioClip>("wet"));
+            await LoadBundle("DevMinecraftMod.Resources.devminecraftmusic");
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("city"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("clark"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("dry"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("hag"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("key"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("mice"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("minecraft"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("subwoofer"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("sweden"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("venus"));
+            albumTracks.Add(await MainResourceBundle.LoadDevAsset<AudioClip>("wet"));
+            MainResourceBundle.Unload(false);
 
             GorillaPressableButton baseButton = null;
             foreach (var mButton in Resources.FindObjectsOfTypeAll<ModeSelectButton>())
@@ -143,10 +145,7 @@ namespace DevMinecraftMod.Music
             buttonText.alignment = TextAnchor.MiddleCenter;
             buttonText.color = new Color(0.1960784f, 0.1960784f, 0.1960784f);
             buttonText.text = $"{(isActivated ? "UNMUTE" : "MUTE")}";
-
             buttonObject.AddComponent<MinecraftMuteButton>();
-
-            remoteAssetBundle.Unload(false);
 
             GameObject tObject = new GameObject();
             tObject.transform.position = Vector3.zero;
@@ -183,7 +182,7 @@ namespace DevMinecraftMod.Music
                 return;
             }
 
-            if (!Plugin.Instance.InRoom)
+            if (!Plugin.Instance.GetRoomState())
             {
                 buttonObject.SetActive(false);
 
@@ -215,12 +214,21 @@ namespace DevMinecraftMod.Music
 
                     if (alreadyPlayed && lastPlayed == song)
                     {
-                        while(lastPlayed == song)
+                        //Debug.LogError("song already played, requesting for different song. attempt #1");
+                        song = Random.Range(0, albumTracks.Count - 1);
+                        if (alreadyPlayed && lastPlayed == song)
                         {
+                            //Debug.LogError("song already played, requesting for different song. attempt #2");
                             song = Random.Range(0, albumTracks.Count - 1);
+                            if (alreadyPlayed && lastPlayed == song)
+                            {
+                                //Debug.LogError("song already played, requesting for different song. attempt #3");
+                                song = Random.Range(0, albumTracks.Count - 1);
+
+                            }
                         }
                     }
-
+                    else
                     if (alreadyPlayed && lastPlayed != song)
                     {
                         //Debug.LogError("playing a new song");
@@ -278,5 +286,51 @@ namespace DevMinecraftMod.Music
                 Instance.SwitchButtonMode();
             }
         }
+
+        #region Asset Loading
+
+        /// <summary>
+        /// Loads in the main AssetBundle used for loading other assets in that bundle
+        /// </summary>
+        /// <returns></returns>
+        public async Task LoadBundle(string bundlePath)
+        {
+            var taskCompletionSource = new TaskCompletionSource<AssetBundle>();
+            var request = AssetBundle.LoadFromStreamAsync(Assembly.GetExecutingAssembly().GetManifestResourceStream(bundlePath));
+            request.completed += operation =>
+            {
+                var outRequest = operation as AssetBundleCreateRequest;
+                taskCompletionSource.SetResult(outRequest.assetBundle);
+            };
+
+            MainResourceBundle = await taskCompletionSource.Task;
+        }
+
+        /// <summary>
+        /// Loads in an asset from the main AssetBundle
+        /// </summary>
+        /// <typeparam name="T">The type of asset which is being loaded</typeparam>
+        /// <param name="assetName">The name of the asset</param>
+        /// <returns></returns>
+        public async Task<T> LoadAsset<T>(string assetName, AssetBundle loadingBundle) where T : Object
+        {
+            var taskCompletionSource = new TaskCompletionSource<T>();
+            var request = loadingBundle.LoadAssetAsync<T>(assetName);
+            request.completed += operation =>
+            {
+                var outRequest = operation as AssetBundleRequest;
+                if (outRequest.asset == null)
+                {
+                    taskCompletionSource.SetResult(null);
+                    return;
+                }
+
+                taskCompletionSource.SetResult(outRequest.asset as T);
+            };
+
+            return await taskCompletionSource.Task;
+        }
+
+        #endregion
     }
 }

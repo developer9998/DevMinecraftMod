@@ -8,14 +8,12 @@
     <None Remove="Resources\devminecraft" />
     <None Remove="Resources\devminecraftblock" />
     <None Remove="Resources\devminecraftmusic" />
-    <None Remove="Resources\extrablockresource" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\devminecraft" />
     <EmbeddedResource Include="Resources\devminecraftblock" />
     <EmbeddedResource Include="Resources\devminecraftmusic" />
-    <EmbeddedResource Include="Resources\extrablockresource" />
   </ItemGroup>
 
   <ItemGroup>

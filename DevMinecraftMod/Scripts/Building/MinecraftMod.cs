@@ -1,15 +1,14 @@
-﻿using System.Reflection;
+﻿using DevMinecraftMod.Scripts.Utils;
+using GorillaLocomotion;
+using HarmonyLib;
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR;
-using HarmonyLib;
-using Photon.Pun;
-using GorillaLocomotion;
-using System.Linq;
-using System;
-using Random = UnityEngine.Random;
 
 // programmed by dev.
 // material data from me, graic, and frogrilla on the official gorilla tag modding discord
@@ -20,15 +19,18 @@ using Random = UnityEngine.Random;
 // 11/3/2022
 // the mod is literally my second most viewed mod on github
 
-// 1/20/2023
-// wowie okay it's been a bit... but hey people are still using the mod!
-// i had no idea what a dictionary was when revamping the mod
+// 6/19/2023
+// so how exactly long has it been? idc for now, but still this code does NOT hold up !!!
 
-namespace DevMinecraftMod.Base
+namespace DevMinecraftMod.Scripts.Building
 {
     public class MinecraftMod : MonoBehaviour
     {
-        public static MinecraftMod Instance;
+
+        public static MinecraftMod Instance { get; private set; }
+        public AssetBundle MainResourceBundle { get; private set; }
+        public AssetBundle AltResourceBundle { get; private set; }
+        private bool Initalized;
 
         public List<MinecraftBlock> blockLinks = new List<MinecraftBlock>();
 
@@ -44,8 +46,6 @@ namespace DevMinecraftMod.Base
         public Text noticeText;
         private LineRenderer ln;
         private Harmony harmony;
-        public AssetBundle blockBundle;
-        public AssetBundle blockBundleAlt;
 
         public AudioClip clip;
 
@@ -66,230 +66,417 @@ namespace DevMinecraftMod.Base
         private readonly List<GameObject> minecraftBlockList = new List<GameObject>();
         private readonly List<string> minecraftBlockListString = new List<string>();
 
-        public Dictionary<Blocks, SoundData> blkToSD = new Dictionary<Blocks, SoundData>()
-        {
-            {Blocks.Grass, SoundData.GenerateSoundWithData(3,"Grass") }, // Soil
-            {Blocks.Dirt, SoundData.GenerateSoundWithData(3,"Dirt") },
-            {Blocks.OakLog, SoundData.GenerateSoundWithData(3,"Log") }, // Logs
-            {Blocks.AcaciaLog, SoundData.GenerateSoundWithData(3,"Log") },
-            {Blocks.BirchLog, SoundData.GenerateSoundWithData(3,"Log") },
-            {Blocks.DarkOakLog, SoundData.GenerateSoundWithData(3,"Log") },
-            {Blocks.JungleLog, SoundData.GenerateSoundWithData(3,"Log") },
-            {Blocks.SpruceLog, SoundData.GenerateSoundWithData(3,"Log") },
-            {Blocks.AcaciaPlanks, SoundData.GenerateSoundWithData(3,"Plank") }, // Planks
-            {Blocks.BirchPlanks, SoundData.GenerateSoundWithData(3,"Plank") },
-            {Blocks.DarkOakPlanks, SoundData.GenerateSoundWithData(3,"Plank") },
-            {Blocks.JunglePlanks, SoundData.GenerateSoundWithData(3,"Plank") },
-            {Blocks.OakPlanks, SoundData.GenerateSoundWithData(3,"Plank") },
-            {Blocks.SprucePlanks, SoundData.GenerateSoundWithData(3,"Plank") },
-            {Blocks.Cobblestone, SoundData.GenerateSoundWithData(3,"Stone") }, // Stone
-            {Blocks.Stone, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.Brick, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.Wool, SoundData.GenerateSoundWithData(3,"Fabric") },
-            {Blocks.AcaciaLeaves, SoundData.GenerateSoundWithData(3,"Grass") }, // Leaves
-            {Blocks.BirchLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
-            {Blocks.DarkOakLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
-            {Blocks.JungleLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
-            {Blocks.OakLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
-            {Blocks.SpruceLeaves, SoundData.GenerateSoundWithData(3,"Grass") },
-            {Blocks.Glass, SoundData.GenerateSoundWithData(3,"GlassPlace", 4, "GlassBreak") }, // Glass
-            {Blocks.CraftingTable, SoundData.GenerateSoundWithData(3,"Plank") }, // Details
-            {Blocks.Furnace, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.CoalOre, SoundData.GenerateSoundWithData(3,"Stone") }, // Ores
-            {Blocks.DiamondOre, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.EmeraldOre, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.GoldOre, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.IronOre, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.LapisOre, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.RedstoneOre, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.Netherrack, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.PackedIce, SoundData.GenerateSoundWithData(3,"IcePlace", 4, "GlassBreak") },
-            {Blocks.Obsidian, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.Bookshelf, SoundData.GenerateSoundWithData(3,"Plank") },
-            {Blocks.CoalBlock, SoundData.GenerateSoundWithData(3,"Stone") }, // Blocks
-            {Blocks.LapisBlock, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.IronBlock, SoundData.GenerateSoundWithData(4,"Metal") },
-            {Blocks.GoldBlock, SoundData.GenerateSoundWithData(4,"Metal") },
-            {Blocks.RedstoneBlock, SoundData.GenerateSoundWithData(4,"Metal") },
-            {Blocks.EmeraldBlock, SoundData.GenerateSoundWithData(4,"Metal") },
-            {Blocks.DiamondBlock, SoundData.GenerateSoundWithData(4,"Metal") },
-            {Blocks.StainedGlass, SoundData.GenerateSoundWithData(3,"GlassPlace", 4, "GlassBreak") },
-            {Blocks.Glowstone, SoundData.GenerateSoundWithData(3,"IcePlace", 4, "GlassBreak") },
-            {Blocks.SoulSand, SoundData.GenerateSoundWithData(3,"Sand") },
-            {Blocks.RegularIce, SoundData.GenerateSoundWithData(3,"IcePlace", 4, "GlassBreak") },
-            {Blocks.SlimeBlock, SoundData.GenerateSoundWithData(3,"SlimePlace") },
-            {Blocks.Pumpkin, SoundData.GenerateSoundWithData(3,"Log") },
-            {Blocks.Jackolantern, SoundData.GenerateSoundWithData(3,"Log") },
-            {Blocks.Melon, SoundData.GenerateSoundWithData(3,"Log") },
-            {Blocks.Bedrock, SoundData.GenerateSoundWithData(3,"Stone") },
-            {Blocks.HayBale, SoundData.GenerateSoundWithData(3,"Grass") },
-            {Blocks.Sponge, SoundData.GenerateSoundWithData(3,"Grass") },
-        };
-
-        public Dictionary<int, BlockPhysData> blkToBD = new Dictionary<int, BlockPhysData>()
-        {
-            {0, BlockPhysData.GenerateBlockDataWithData(7, 14, 14, 14, 14, 14, false, false, Blocks.Grass)}, // Soil
-            {1, BlockPhysData.GenerateBlockDataWithData(14, 14, 14, 14, 14, 14, false, false, Blocks.Dirt)},
-            {2, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.OakLog)}, // Logs
-            {3, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.SpruceLog)},
-            {4, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.BirchLog)},
-            {5, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.JungleLog)},
-            {6, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.AcaciaLog)},
-            {7, BlockPhysData.GenerateBlockDataWithData(9, 9, 8, 8, 8, 8, false, false, Blocks.DarkOakLog)},
-            {8, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.OakPlanks)}, // Planks
-            {9, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.SprucePlanks)},
-            {10, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.BirchPlanks)},
-            {11, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.JunglePlanks)},
-            {12, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.AcaciaPlanks)},
-            {13, BlockPhysData.GenerateBlockDataWithData(9, 9, 9, 9, 9, 9, false, false, Blocks.DarkOakPlanks)},
-            {14, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.OakLeaves)}, // Leaves
-            {15, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.SpruceLeaves)},
-            {16, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.BirchLeaves)},
-            {17, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.JungleLeaves)},
-            {18, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.AcaciaLeaves)}, // Leaves
-            {19, BlockPhysData.GenerateBlockDataWithData(99, 99, 99, 99, 99, 99, false, false, Blocks.DarkOakLeaves)},
-            {20, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Cobblestone)}, // Stone
-            {21, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Stone)},
-            {22, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.CoalOre)}, // Ores
-            {23, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.IronOre)},
-            {24, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.GoldOre)},
-            {25, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.RedstoneOre)},
-            {26, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.LapisOre)},
-            {27, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.EmeraldOre)},
-            {28, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.DiamondOre)},
-            {29, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.CoalBlock)}, // Block
-            {30, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.IronBlock)},
-            {31, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.GoldBlock)},
-            {32, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.RedstoneBlock)},
-            {33, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.LapisBlock)},
-            {34, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.EmeraldBlock)},
-            {35, BlockPhysData.GenerateBlockDataWithData(146, 146, 146, 146, 146, 146, false, false, Blocks.DiamondBlock)},
-            {36, BlockPhysData.GenerateBlockDataWithData(106, 106, 106, 106, 106, 106, false, false, Blocks.Glass)},
-            {37, BlockPhysData.GenerateBlockDataWithData(106, 106, 106, 106, 106, 106, false, true, Blocks.StainedGlass)},
-            {38, BlockPhysData.GenerateBlockDataWithData(107, 107, 107, 107, 107, 107, false, true, Blocks.Wool)}, // Blocks
-            {39, BlockPhysData.GenerateBlockDataWithData(145, 145, 145, 145, 145, 145, false, false, Blocks.Bookshelf)},
-            {40, BlockPhysData.GenerateBlockDataWithData(145, 145, 145, 145, 145, 145, false, false, Blocks.CraftingTable)},
-            {41, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Furnace)},
-            {42, BlockPhysData.GenerateBlockDataWithData(59, 59, 59, 59, 59, 59, false, false, Blocks.RegularIce)},
-            {43, BlockPhysData.GenerateBlockDataWithData(59, 59, 59, 59, 59, 59, false, false, Blocks.PackedIce)},
-            {44, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Netherrack)},
-            {45, BlockPhysData.GenerateBlockDataWithData(88, 88, 88, 88, 88, 88, false, false, Blocks.SoulSand)},
-            {46, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Obsidian)},
-            {47, BlockPhysData.GenerateBlockDataWithData(120, 120, 120, 120, 120, 120, false, false, Blocks.Glowstone)},
-            {48, BlockPhysData.GenerateBlockDataWithData(96, 96, 96, 96, 96, 96, true, false, Blocks.SlimeBlock)},
-            {49, BlockPhysData.GenerateBlockDataWithData(81, 81, 81, 81, 81, 81, false, false, Blocks.Pumpkin)},
-            {50, BlockPhysData.GenerateBlockDataWithData(81, 81, 81, 81, 81, 81, false, false, Blocks.Jackolantern)},
-            {51, BlockPhysData.GenerateBlockDataWithData(96, 96, 96, 96, 96, 96, false, false, Blocks.Sponge)},
-            {52, BlockPhysData.GenerateBlockDataWithData(145, 145, 145, 145, 145, 145, false, false, Blocks.Melon)},
-            {53, BlockPhysData.GenerateBlockDataWithData(88, 88, 88, 88, 88, 88, false, false, Blocks.HayBale)},
-            {54, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Bedrock)},
-            {55, BlockPhysData.GenerateBlockDataWithData(0, 0, 0, 0, 0, 0, false, false, Blocks.Brick)},
-        };
-
         #region Place/Destroy Functions
 
-        void PlaySpawnBlockAudio(Blocks block, Vector3 blockPosition)
+        async void PlaySpawnBlockAudio(Blocks block, Vector3 blockPosition)
         {
-            GameObject soundObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("SoundExample"));
+            GameObject soundObjectTemp = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("SoundExample"));
             soundObjectTemp.transform.position = blockPosition;
             AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
 
-            AudioClip clip = blockBundle.LoadAsset<AudioClip>($"{blkToSD[block].soundName}{Random.Range(1, blkToSD[block].soundRange)}") ?? blockBundleAlt.LoadAsset<AudioClip>($"{blkToSD[block].soundName}{Random.Range(1, blkToSD[block].soundRange)}");
-            audioSourceTemp.PlayOneShot(clip, Plugin.Instance.blockVolume);
+            switch (block)
+            {
+                case Blocks.Grass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Dirt:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.OakLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SpruceLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.BirchLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.JungleLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.AcaciaLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.DarkOakLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.OakPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SprucePlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.BirchPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.JunglePlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.AcaciaPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.DarkOakPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Cobblestone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Brick:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Stone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Wool:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.OakLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SpruceLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.BirchLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.JungleLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.AcaciaLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.DarkOakLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Glass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassPlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.CraftingTable:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Furnace:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.IronOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.GoldOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.DiamondOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.RedstoneOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.EmeraldOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.CoalOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.LapisOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Netherrack:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.PackedIce:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"IcePlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Obsidian:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Bookshelf:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.CoalBlock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.LapisBlock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.IronBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.GoldBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.RedstoneBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.EmeraldBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.DiamondBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.StainedGlass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassPlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Glowstone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"IcePlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SoulSand:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Sand{Random.Range(1, 3)}"), 0.2f); break;
+                case Blocks.RegularIce:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"IcePlace{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SlimeBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"SlimePlace{Random.Range(1, 3)}"), 0.2f); break;
+                case Blocks.Pumpkin:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Jackolantern:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Melon:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Bedrock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.HayBale:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Sponge:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+            }
+
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
             audioSourceTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 3;
         }
 
-        void DestroyBlock(Blocks block, Vector3 blockPosition, Color blockColour)
+        async void DestroyBlock(Blocks block, Vector3 blockPosition, Color blockColour)
         {
-            GameObject soundObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("SoundExample"));
+            GameObject soundObjectTemp = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("SoundExample"));
             soundObjectTemp.transform.position = blockPosition;
             AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
 
-            AudioClip clip = blockBundle.LoadAsset<AudioClip>($"{blkToSD[block].destroySoundName}{Random.Range(1, blkToSD[block].destroyRange)}") ?? blockBundleAlt.LoadAsset<AudioClip>($"{blkToSD[block].destroySoundName}{Random.Range(1, blkToSD[block].destroyRange)}");
-            audioSourceTemp.PlayOneShot(clip, Plugin.Instance.blockVolume);
+            switch (block)
+            {
+                case Blocks.Grass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Dirt:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.OakLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SpruceLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.BirchLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.JungleLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.AcaciaLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.DarkOakLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.OakPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SprucePlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.BirchPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.JunglePlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.AcaciaPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.DarkOakPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Cobblestone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Brick:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Stone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Wool:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.OakLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SpruceLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.BirchLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.JungleLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.AcaciaLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.DarkOakLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Glass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.CraftingTable:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Furnace:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.IronOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.GoldOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.DiamondOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.RedstoneOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.EmeraldOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.CoalOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.LapisOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Netherrack:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.PackedIce:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Obsidian:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.Bookshelf:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.CoalBlock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.LapisBlock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.IronBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.GoldBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.RedstoneBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.EmeraldBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.DiamondBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.StainedGlass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Glowstone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.SoulSand:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Sand{Random.Range(1, 3)}"), 0.2f); break;
+                case Blocks.RegularIce:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), Plugin.Instance.blockVolume);
+                    break;
+                case Blocks.SlimeBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"SlimePlace{Random.Range(1, 3)}"), 0.2f); break;
+                case Blocks.Pumpkin:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Jackolantern:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Melon:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Bedrock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.HayBale:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+                case Blocks.Sponge:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), Plugin.Instance.blockVolume); break;
+            }
+
             audioSourceTemp.transform.SetParent(objectStorage.transform, false);
             audioSourceTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 3;
 
-            GameObject particleObjectTemp = Instantiate(blockBundle.LoadAsset<GameObject>("BlockParticle"));
+            GameObject particleObjectTemp = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("BlockParticle"));
             particleObjectTemp.transform.position = blockPosition - new Vector3(0, 0.15f, 0);
 
             foreach (ParticleSystem partS in particleObjectTemp.transform.GetComponentsInChildren<ParticleSystem>())
             {
                 ParticleSystemRenderer psr = partS.GetComponent<ParticleSystemRenderer>();
 
-                SetParticleMaterial(psr, blockBundle, "dirt", Blocks.Grass, block);
-                SetParticleMaterial(psr, blockBundle, "dirt", Blocks.Dirt, block);
-                SetParticleMaterial(psr, blockBundle, "log", Blocks.OakLog, block);
+                SetParticleMaterial(psr, MainResourceBundle, "dirt", Blocks.Grass, block);
+                SetParticleMaterial(psr, MainResourceBundle, "dirt", Blocks.Dirt, block);
+                SetParticleMaterial(psr, MainResourceBundle, "log", Blocks.OakLog, block);
 
-                SetParticleMaterial(psr, blockBundleAlt, "SpruceLog", Blocks.SpruceLog, block);
-                SetParticleMaterial(psr, blockBundleAlt, "BirchLog", Blocks.BirchLog, block);
-                SetParticleMaterial(psr, blockBundleAlt, "JungleLog", Blocks.JungleLog, block);
-                SetParticleMaterial(psr, blockBundleAlt, "AcaciaLog", Blocks.AcaciaLog, block);
-                SetParticleMaterial(psr, blockBundleAlt, "BigOakLog", Blocks.DarkOakLog, block);
+                SetParticleMaterial(psr, AltResourceBundle, "SpruceLog", Blocks.SpruceLog, block);
+                SetParticleMaterial(psr, AltResourceBundle, "BirchLog", Blocks.BirchLog, block);
+                SetParticleMaterial(psr, AltResourceBundle, "JungleLog", Blocks.JungleLog, block);
+                SetParticleMaterial(psr, AltResourceBundle, "AcaciaLog", Blocks.AcaciaLog, block);
+                SetParticleMaterial(psr, AltResourceBundle, "BigOakLog", Blocks.DarkOakLog, block);
 
-                SetParticleMaterial(psr, blockBundle, "plank", Blocks.OakPlanks, block);
+                SetParticleMaterial(psr, MainResourceBundle, "plank", Blocks.OakPlanks, block);
 
-                SetParticleMaterial(psr, blockBundleAlt, "SprucePlanks", Blocks.SprucePlanks, block);
-                SetParticleMaterial(psr, blockBundleAlt, "BirchPlanks", Blocks.BirchPlanks, block);
-                SetParticleMaterial(psr, blockBundleAlt, "JunglePlanks", Blocks.JunglePlanks, block);
-                SetParticleMaterial(psr, blockBundleAlt, "AcaciaPlanks", Blocks.AcaciaPlanks, block);
-                SetParticleMaterial(psr, blockBundleAlt, "DarkOakPlanks", Blocks.DarkOakPlanks, block);
+                SetParticleMaterial(psr, AltResourceBundle, "SprucePlanks", Blocks.SprucePlanks, block);
+                SetParticleMaterial(psr, AltResourceBundle, "BirchPlanks", Blocks.BirchPlanks, block);
+                SetParticleMaterial(psr, AltResourceBundle, "JunglePlanks", Blocks.JunglePlanks, block);
+                SetParticleMaterial(psr, AltResourceBundle, "AcaciaPlanks", Blocks.AcaciaPlanks, block);
+                SetParticleMaterial(psr, AltResourceBundle, "DarkOakPlanks", Blocks.DarkOakPlanks, block);
 
-                SetParticleMaterial(psr, blockBundle, "leaves", Blocks.OakLeaves, block);
-                SetParticleMaterial(psr, blockBundleAlt, "SpruceLeaves", Blocks.SpruceLeaves, block);
-                SetParticleMaterial(psr, blockBundleAlt, "BirchLeaves", Blocks.BirchLeaves, block);
-                SetParticleMaterial(psr, blockBundleAlt, "JungleLeaves", Blocks.JungleLeaves, block);
-                SetParticleMaterial(psr, blockBundleAlt, "AcaciaLeaves", Blocks.AcaciaLeaves, block);
-                SetParticleMaterial(psr, blockBundleAlt, "DarkOakLeaves", Blocks.DarkOakLeaves, block);
+                SetParticleMaterial(psr, MainResourceBundle, "leaves", Blocks.OakLeaves, block);
+                SetParticleMaterial(psr, AltResourceBundle, "SpruceLeaves", Blocks.SpruceLeaves, block);
+                SetParticleMaterial(psr, AltResourceBundle, "BirchLeaves", Blocks.BirchLeaves, block);
+                SetParticleMaterial(psr, AltResourceBundle, "JungleLeaves", Blocks.JungleLeaves, block);
+                SetParticleMaterial(psr, AltResourceBundle, "AcaciaLeaves", Blocks.AcaciaLeaves, block);
+                SetParticleMaterial(psr, AltResourceBundle, "DarkOakLeaves", Blocks.DarkOakLeaves, block);
 
-                SetParticleMaterial(psr, blockBundle, "stone", Blocks.Stone, block);
-                SetParticleMaterial(psr, blockBundle, "cobblestone", Blocks.Cobblestone, block);
-                SetParticleMaterial(psr, blockBundle, "brick", Blocks.Brick, block);
+                SetParticleMaterial(psr, MainResourceBundle, "stone", Blocks.Stone, block);
+                SetParticleMaterial(psr, MainResourceBundle, "cobblestone", Blocks.Cobblestone, block);
+                SetParticleMaterial(psr, MainResourceBundle, "brick", Blocks.Brick, block);
 
-                SetParticleMaterial(psr, blockBundleAlt, "CoalOre", Blocks.CoalOre, block);
-                SetParticleMaterial(psr, blockBundleAlt, "RedstoneOre", Blocks.RedstoneOre, block);
-                SetParticleMaterial(psr, blockBundleAlt, "EmeraldOre", Blocks.EmeraldOre, block);
-                SetParticleMaterial(psr, blockBundleAlt, "LapisOre", Blocks.LapisOre, block);
-                SetParticleMaterial(psr, blockBundleAlt, "DiamondOre", Blocks.DiamondOre, block);
+                SetParticleMaterial(psr, AltResourceBundle, "CoalOre", Blocks.CoalOre, block);
+                SetParticleMaterial(psr, AltResourceBundle, "RedstoneOre", Blocks.RedstoneOre, block);
+                SetParticleMaterial(psr, AltResourceBundle, "EmeraldOre", Blocks.EmeraldOre, block);
+                SetParticleMaterial(psr, AltResourceBundle, "LapisOre", Blocks.LapisOre, block);
+                SetParticleMaterial(psr, AltResourceBundle, "DiamondOre", Blocks.DiamondOre, block);
 
-                SetParticleMaterial(psr, blockBundle, "ironore", Blocks.IronOre, block);
-                SetParticleMaterial(psr, blockBundle, "goldore", Blocks.GoldOre, block);
+                SetParticleMaterial(psr, MainResourceBundle, "ironore", Blocks.IronOre, block);
+                SetParticleMaterial(psr, MainResourceBundle, "goldore", Blocks.GoldOre, block);
 
-                SetParticleMaterial(psr, blockBundleAlt, "CoalBlock", Blocks.CoalBlock, block);
-                SetParticleMaterial(psr, blockBundleAlt, "RedstoneBlock", Blocks.RedstoneBlock, block);
-                SetParticleMaterial(psr, blockBundleAlt, "EmeraldBlock", Blocks.EmeraldBlock, block);
-                SetParticleMaterial(psr, blockBundleAlt, "LapisBlock", Blocks.LapisBlock, block);
-                SetParticleMaterial(psr, blockBundleAlt, "DiamondBlock", Blocks.DiamondBlock, block);
-                SetParticleMaterial(psr, blockBundleAlt, "IronBlock", Blocks.IronBlock, block);
-                SetParticleMaterial(psr, blockBundleAlt, "GoldBlock", Blocks.GoldBlock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "CoalBlock", Blocks.CoalBlock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "RedstoneBlock", Blocks.RedstoneBlock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "EmeraldBlock", Blocks.EmeraldBlock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "LapisBlock", Blocks.LapisBlock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "DiamondBlock", Blocks.DiamondBlock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "IronBlock", Blocks.IronBlock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "GoldBlock", Blocks.GoldBlock, block);
 
-                SetParticleMaterial(psr, blockBundle, "glass", Blocks.Glass, block);
-                SetParticleMaterial(psr, blockBundle, "stainGlass", Blocks.StainedGlass, block);
-                SetParticleMaterial(psr, blockBundle, "wool", Blocks.Wool, block);
-                SetParticleMaterial(psr, blockBundle, "bookshelf", Blocks.Bookshelf, block);
+                SetParticleMaterial(psr, MainResourceBundle, "glass", Blocks.Glass, block);
+                SetParticleMaterial(psr, MainResourceBundle, "stainGlass", Blocks.StainedGlass, block);
+                SetParticleMaterial(psr, MainResourceBundle, "wool", Blocks.Wool, block);
+                SetParticleMaterial(psr, MainResourceBundle, "bookshelf", Blocks.Bookshelf, block);
 
-                SetParticleMaterial(psr, blockBundle, "craft1", Blocks.CraftingTable, block);
-                SetParticleMaterial(psr, blockBundle, "furn2", Blocks.Furnace, block);
+                SetParticleMaterial(psr, MainResourceBundle, "craft1", Blocks.CraftingTable, block);
+                SetParticleMaterial(psr, MainResourceBundle, "furn2", Blocks.Furnace, block);
 
-                SetParticleMaterial(psr, blockBundle, "netherrack", Blocks.Netherrack, block);
-                SetParticleMaterial(psr, blockBundle, "packed", Blocks.PackedIce, block);
-                SetParticleMaterial(psr, blockBundle, "obsidian", Blocks.Obsidian, block);
+                SetParticleMaterial(psr, MainResourceBundle, "netherrack", Blocks.Netherrack, block);
+                SetParticleMaterial(psr, MainResourceBundle, "packed", Blocks.PackedIce, block);
+                SetParticleMaterial(psr, MainResourceBundle, "obsidian", Blocks.Obsidian, block);
 
-                SetParticleMaterial(psr, blockBundleAlt, "SoulSand", Blocks.SoulSand, block);
-                SetParticleMaterial(psr, blockBundleAlt, "RegularIce", Blocks.RegularIce, block);
-                SetParticleMaterial(psr, blockBundleAlt, "Glowstone", Blocks.Glowstone, block);
+                SetParticleMaterial(psr, AltResourceBundle, "SoulSand", Blocks.SoulSand, block);
+                SetParticleMaterial(psr, AltResourceBundle, "RegularIce", Blocks.RegularIce, block);
+                SetParticleMaterial(psr, AltResourceBundle, "Glowstone", Blocks.Glowstone, block);
 
-                SetParticleMaterial(psr, blockBundleAlt, "SlimeBlock", Blocks.SlimeBlock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "SlimeBlock", Blocks.SlimeBlock, block);
 
-                SetParticleMaterial(psr, blockBundleAlt, "PumpkinFront", Blocks.Pumpkin, block);
-                SetParticleMaterial(psr, blockBundleAlt, "PumpkinOn", Blocks.Jackolantern, block);
-                SetParticleMaterial(psr, blockBundleAlt, "MelonSide", Blocks.Melon, block);
-                SetParticleMaterial(psr, blockBundleAlt, "HaySide", Blocks.HayBale, block);
-                SetParticleMaterial(psr, blockBundleAlt, "Sponge", Blocks.Sponge, block);
-                SetParticleMaterial(psr, blockBundleAlt, "bedrock", Blocks.Bedrock, block);
+                SetParticleMaterial(psr, AltResourceBundle, "PumpkinFront", Blocks.Pumpkin, block);
+                SetParticleMaterial(psr, AltResourceBundle, "PumpkinOn", Blocks.Jackolantern, block);
+                SetParticleMaterial(psr, AltResourceBundle, "MelonSide", Blocks.Melon, block);
+                SetParticleMaterial(psr, AltResourceBundle, "HaySide", Blocks.HayBale, block);
+                SetParticleMaterial(psr, AltResourceBundle, "Sponge", Blocks.Sponge, block);
+                SetParticleMaterial(psr, AltResourceBundle, "bedrock", Blocks.Bedrock, block);
 
-                SetParticleMaterial(psr, blockBundle, "brick", Blocks.Brick, block);
+                SetParticleMaterial(psr, MainResourceBundle, "brick", Blocks.Brick, block);
 
                 psr.material.mainTextureScale = new Vector2(0.2f, 0.2f);
                 if (block == Blocks.Wool)
@@ -307,6 +494,268 @@ namespace DevMinecraftMod.Base
 
             particleObjectTemp.transform.SetParent(objectStorage.transform, false);
             particleObjectTemp.gameObject.AddComponent<AutoDelete>().DestroyTime = 2;
+        }
+
+        void DestroyBlockOptimized(Blocks block, Vector3 blockPosition, Color blockColour)
+        {
+            /*GameObject soundObjectTemp = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("SoundExample"));
+            soundObjectTemp.transform.position = blockPosition;
+            AudioSource audioSourceTemp = soundObjectTemp.GetComponent<AudioSource>();
+
+            switch (block)
+            {
+                case Blocks.Grass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Dirt:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Dirt{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.SpruceLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.BirchLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.JungleLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.AcaciaLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.DarkOakLog:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.SprucePlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.BirchPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.JunglePlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.AcaciaPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.DarkOakPlanks:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Cobblestone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Brick:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Stone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Wool:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Fabric{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.OakLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.SpruceLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.BirchLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.JungleLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.AcaciaLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.DarkOakLeaves:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Glass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f);
+                    break;
+                case Blocks.CraftingTable:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Furnace:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.IronOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.GoldOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.DiamondOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.RedstoneOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.EmeraldOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.CoalOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.LapisOre:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Netherrack:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.PackedIce:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f);
+                    break;
+                case Blocks.Obsidian:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.Bookshelf:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Plank{Random.Range(1, 3)}"), 0.5f);
+                    break;
+                case Blocks.CoalBlock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f); break;
+                case Blocks.LapisBlock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f); break;
+                case Blocks.IronBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), 0.5f); break;
+                case Blocks.GoldBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), 0.5f); break;
+                case Blocks.RedstoneBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), 0.5f); break;
+                case Blocks.EmeraldBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), 0.5f); break;
+                case Blocks.DiamondBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Metal{Random.Range(1, 4)}"), 0.5f); break;
+                case Blocks.StainedGlass:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f); break;
+                case Blocks.Glowstone:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f); break;
+                case Blocks.SoulSand:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"Sand{Random.Range(1, 3)}"), 0.2f); break;
+                case Blocks.RegularIce:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"GlassBreak{Random.Range(1, 4)}"), 0.5f);
+                    break;
+                case Blocks.SlimeBlock:
+                    audioSourceTemp.PlayOneShot(await AltResourceBundle.LoadDevAsset<AudioClip>($"SlimePlace{Random.Range(1, 3)}"), 0.2f); break;
+                case Blocks.Pumpkin:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f); break;
+                case Blocks.Jackolantern:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f); break;
+                case Blocks.Melon:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Log{Random.Range(1, 3)}"), 0.5f); break;
+                case Blocks.Bedrock:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Stone{Random.Range(1, 3)}"), 0.5f); break;
+                case Blocks.HayBale:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f); break;
+                case Blocks.Sponge:
+                    audioSourceTemp.PlayOneShot(await MainResourceBundle.LoadDevAsset<AudioClip>($"Grass{Random.Range(1, 3)}"), 0.5f); break;
+            }
+
+            audioSourceTemp.transform.SetParent(objectStorage.transform, false);
+            audioSourceTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 3;
+
+            GameObject particleObjectTemp = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("BlockParticle"));
+            particleObjectTemp.transform.position = blockPosition - new Vector3(0, 0.15f, 0);
+
+            ParticleSystem ps = particleObjectTemp.GetComponent<ParticleSystem>(); // play station
+            ParticleSystemRenderer psr = ps.GetComponent<ParticleSystemRenderer>();
+
+            SetParticleMaterial(psr, MainResourceBundle, "dirt", Blocks.Grass, block);
+            SetParticleMaterial(psr, MainResourceBundle, "dirt", Blocks.Dirt, block);
+            SetParticleMaterial(psr, MainResourceBundle, "log", Blocks.OakLog, block);
+
+            SetParticleMaterial(psr, AltResourceBundle, "SpruceLog", Blocks.SpruceLog, block);
+            SetParticleMaterial(psr, AltResourceBundle, "BirchLog", Blocks.BirchLog, block);
+            SetParticleMaterial(psr, AltResourceBundle, "JungleLog", Blocks.JungleLog, block);
+            SetParticleMaterial(psr, AltResourceBundle, "AcaciaLog", Blocks.AcaciaLog, block);
+            SetParticleMaterial(psr, AltResourceBundle, "BigOakLog", Blocks.DarkOakLog, block);
+
+            SetParticleMaterial(psr, MainResourceBundle, "plank", Blocks.OakPlanks, block);
+
+            SetParticleMaterial(psr, AltResourceBundle, "SprucePlanks", Blocks.SprucePlanks, block);
+            SetParticleMaterial(psr, AltResourceBundle, "BirchPlanks", Blocks.BirchPlanks, block);
+            SetParticleMaterial(psr, AltResourceBundle, "JunglePlanks", Blocks.JunglePlanks, block);
+            SetParticleMaterial(psr, AltResourceBundle, "AcaciaPlanks", Blocks.AcaciaPlanks, block);
+            SetParticleMaterial(psr, AltResourceBundle, "DarkOakPlanks", Blocks.DarkOakPlanks, block);
+
+            SetParticleMaterial(psr, MainResourceBundle, "leaves", Blocks.OakLeaves, block);
+            SetParticleMaterial(psr, AltResourceBundle, "SpruceLeaves", Blocks.SpruceLeaves, block);
+            SetParticleMaterial(psr, AltResourceBundle, "BirchLeaves", Blocks.BirchLeaves, block);
+            SetParticleMaterial(psr, AltResourceBundle, "JungleLeaves", Blocks.JungleLeaves, block);
+            SetParticleMaterial(psr, AltResourceBundle, "AcaciaLeaves", Blocks.AcaciaLeaves, block);
+            SetParticleMaterial(psr, AltResourceBundle, "DarkOakLeaves", Blocks.DarkOakLeaves, block);
+
+            SetParticleMaterial(psr, MainResourceBundle, "stone", Blocks.Stone, block);
+            SetParticleMaterial(psr, MainResourceBundle, "cobblestone", Blocks.Cobblestone, block);
+            SetParticleMaterial(psr, MainResourceBundle, "brick", Blocks.Brick, block);
+
+            SetParticleMaterial(psr, AltResourceBundle, "CoalOre", Blocks.CoalOre, block);
+            SetParticleMaterial(psr, AltResourceBundle, "RedstoneOre", Blocks.RedstoneOre, block);
+            SetParticleMaterial(psr, AltResourceBundle, "EmeraldOre", Blocks.EmeraldOre, block);
+            SetParticleMaterial(psr, AltResourceBundle, "LapisOre", Blocks.LapisOre, block);
+            SetParticleMaterial(psr, AltResourceBundle, "DiamondOre", Blocks.DiamondOre, block);
+
+            SetParticleMaterial(psr, MainResourceBundle, "ironore", Blocks.IronOre, block);
+            SetParticleMaterial(psr, MainResourceBundle, "goldore", Blocks.GoldOre, block);
+
+            SetParticleMaterial(psr, AltResourceBundle, "CoalBlock", Blocks.CoalBlock, block);
+            SetParticleMaterial(psr, AltResourceBundle, "RedstoneBlock", Blocks.RedstoneBlock, block);
+            SetParticleMaterial(psr, AltResourceBundle, "EmeraldBlock", Blocks.EmeraldBlock, block);
+            SetParticleMaterial(psr, AltResourceBundle, "LapisBlock", Blocks.LapisBlock, block);
+            SetParticleMaterial(psr, AltResourceBundle, "DiamondBlock", Blocks.DiamondBlock, block);
+            SetParticleMaterial(psr, AltResourceBundle, "IronBlock", Blocks.IronBlock, block);
+            SetParticleMaterial(psr, AltResourceBundle, "GoldBlock", Blocks.GoldBlock, block);
+
+            SetParticleMaterial(psr, MainResourceBundle, "glass", Blocks.Glass, block);
+            SetParticleMaterial(psr, MainResourceBundle, "stainGlass", Blocks.StainedGlass, block);
+            SetParticleMaterial(psr, MainResourceBundle, "wool", Blocks.Wool, block);
+            SetParticleMaterial(psr, MainResourceBundle, "bookshelf", Blocks.Bookshelf, block);
+
+            SetParticleMaterial(psr, MainResourceBundle, "craft1", Blocks.CraftingTable, block);
+            SetParticleMaterial(psr, MainResourceBundle, "furn2", Blocks.Furnace, block);
+
+            SetParticleMaterial(psr, MainResourceBundle, "netherrack", Blocks.Netherrack, block);
+            SetParticleMaterial(psr, MainResourceBundle, "packed", Blocks.PackedIce, block);
+            SetParticleMaterial(psr, MainResourceBundle, "obsidian", Blocks.Obsidian, block);
+
+            SetParticleMaterial(psr, AltResourceBundle, "SoulSand", Blocks.SoulSand, block);
+            SetParticleMaterial(psr, AltResourceBundle, "RegularIce", Blocks.RegularIce, block);
+            SetParticleMaterial(psr, AltResourceBundle, "Glowstone", Blocks.Glowstone, block);
+
+            SetParticleMaterial(psr, AltResourceBundle, "SlimeBlock", Blocks.SlimeBlock, block);
+
+            SetParticleMaterial(psr, AltResourceBundle, "PumpkinFront", Blocks.Pumpkin, block);
+            SetParticleMaterial(psr, AltResourceBundle, "PumpkinOn", Blocks.Jackolantern, block);
+            SetParticleMaterial(psr, AltResourceBundle, "MelonSide", Blocks.Melon, block);
+            SetParticleMaterial(psr, AltResourceBundle, "HaySide", Blocks.HayBale, block);
+            SetParticleMaterial(psr, AltResourceBundle, "Sponge", Blocks.Sponge, block);
+            SetParticleMaterial(psr, AltResourceBundle, "bedrock", Blocks.Bedrock, block);
+
+            SetParticleMaterial(psr, MainResourceBundle, "brick", Blocks.Brick, block);
+
+            psr.material.mainTextureScale = new Vector2(0.2f, 0.2f);
+            if (block == Blocks.Wool)
+            {
+                psr.material.color = blockColour;
+            }
+            if (block == Blocks.StainedGlass)
+            {
+                psr.material.color = blockColour;
+            }
+
+            psr.material.mainTextureOffset = new Vector2(0.1f * Random.Range(0, 11), 0.1f * Random.Range(0, 11));
+
+            ps.Play();
+
+            particleObjectTemp.transform.SetParent(objectStorage.transform, false);
+            particleObjectTemp.gameObject.AddComponent<MinecraftAutoDelete>().DestroyTime = 2;
+            */
         }
 
         public void DestroyBlockOptimized(GameObject destroyObject)
@@ -406,10 +855,7 @@ namespace DevMinecraftMod.Base
 
                 if (slippery)
                 {
-                    PhysicMaterial slipMat = null;
-                    var iceObjects = Resources.FindObjectsOfTypeAll<GameObject>().Where(obj => obj.name == "mountainsideice");
-                    if (iceObjects.ToList().Count != 0) slipMat = iceObjects.ToList()[0].GetComponent<Collider>().material;
-                    block.GetChild(i).gameObject.GetComponent<BoxCollider>().material = slipMat ?? null;
+                    block.GetChild(i).gameObject.GetComponent<BoxCollider>().material = Resources.Load<PhysicMaterial>("objects/forest/materials/Slippery");
                 }
             }
         }
@@ -470,12 +916,12 @@ namespace DevMinecraftMod.Base
             if (headDistance < 0.75f)
                 return;
 
-            float rightHandDistance = Vector3.Distance(block.transform.position, Player.Instance.rightHandTransform.position);
+            float rightHandDistance = Vector3.Distance(block.transform.position, Player.Instance.rightControllerTransform.position);
 
             if (rightHandDistance < 0.685f)
                 return;
 
-            float leftHandDistance = Vector3.Distance(block.transform.position, Player.Instance.leftHandTransform.position);
+            float leftHandDistance = Vector3.Distance(block.transform.position, Player.Instance.leftControllerTransform.position);
 
             if (leftHandDistance < 0.685f)
                 return;
@@ -514,12 +960,295 @@ namespace DevMinecraftMod.Base
                     Transform blockColliders = tempBlock.transform.GetChild(0);
                     blockColliders.GetComponent<BoxCollider>().enabled = false;
 
-                    var dataUsed = blkToBD[currentBlock];
-                    Blocks usedBlockEnum = dataUsed.CurBlock;
-                    SetSurfaceIndex(blockColliders, dataUsed.SurData.front, dataUsed.SurData.left, dataUsed.SurData.right, dataUsed.SurData.back, dataUsed.SurData.up, dataUsed.SurData.down, dataUsed.HasCustomColour, Player.Instance.materialData[currentBlock].slidePercent >= 0.1f);
-                    if (dataUsed.IsBouncy) SetTrampoline(blockColliders);
+                    Blocks usedBlockEnum = Blocks.Grass;
 
-                    foreach (BoxCollider bx in tempBlock.transform.GetComponentsInChildren<BoxCollider>(false))
+                    if (currentBlock == 0)
+                    {
+                        SetSurfaceIndex(blockColliders, 14, 14, 14, 14, 7, 14, false, false);
+                    }
+                    else if (currentBlock == 1)
+                    {
+                        SetSurfaceIndex(blockColliders, 14, 14, 14, 14, 14, 14, false, false);
+                        usedBlockEnum = Blocks.Dirt;
+                    }
+                    else if (currentBlock == 2)
+                    {
+                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
+                        usedBlockEnum = Blocks.OakLog;
+                    }
+                    else if (currentBlock == 3)
+                    {
+                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
+                        usedBlockEnum = Blocks.SpruceLog;
+                    }
+                    else if (currentBlock == 4)
+                    {
+                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
+                        usedBlockEnum = Blocks.BirchLog;
+                    }
+                    else if (currentBlock == 5)
+                    {
+                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
+                        usedBlockEnum = Blocks.JungleLog;
+                    }
+                    else if (currentBlock == 6)
+                    {
+                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
+                        usedBlockEnum = Blocks.AcaciaLog;
+                    }
+                    else if (currentBlock == 7)
+                    {
+                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 9, 9, false, false);
+                        usedBlockEnum = Blocks.DarkOakLog;
+                    }
+                    else if (currentBlock == 8)
+                    {
+                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
+                        usedBlockEnum = Blocks.OakPlanks;
+                    }
+                    else if (currentBlock == 9)
+                    {
+                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
+                        usedBlockEnum = Blocks.SprucePlanks;
+                    }
+                    else if (currentBlock == 10)
+                    {
+                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
+                        usedBlockEnum = Blocks.BirchPlanks;
+                    }
+                    else if (currentBlock == 11)
+                    {
+                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
+                        usedBlockEnum = Blocks.JunglePlanks;
+                    }
+                    else if (currentBlock == 12)
+                    {
+                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
+                        usedBlockEnum = Blocks.AcaciaPlanks;
+                    }
+                    else if (currentBlock == 13)
+                    {
+                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
+                        usedBlockEnum = Blocks.DarkOakPlanks;
+                    }
+                    else if (currentBlock == 14)
+                    {
+                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
+                        usedBlockEnum = Blocks.OakLeaves;
+                    }
+                    else if (currentBlock == 15)
+                    {
+                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
+                        usedBlockEnum = Blocks.SpruceLeaves;
+                    }
+                    else if (currentBlock == 16)
+                    {
+                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
+                        usedBlockEnum = Blocks.BirchLeaves;
+                    }
+                    else if (currentBlock == 17)
+                    {
+                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
+                        usedBlockEnum = Blocks.JungleLeaves;
+                    }
+                    else if (currentBlock == 18)
+                    {
+                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
+                        usedBlockEnum = Blocks.AcaciaLeaves;
+                    }
+                    else if (currentBlock == 19)
+                    {
+                        SetSurfaceIndex(blockColliders, 31, 31, 31, 31, 31, 31, false, false);
+                        usedBlockEnum = Blocks.DarkOakLeaves;
+                    }
+                    else if (currentBlock == 20)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.Cobblestone;
+                    }
+                    else if (currentBlock == 21)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.Stone;
+                    }
+                    else if (currentBlock == 22)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.CoalOre;
+                    }
+                    else if (currentBlock == 23)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.IronOre;
+                    }
+                    else if (currentBlock == 24)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.GoldOre;
+                    }
+                    else if (currentBlock == 25)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.RedstoneOre;
+                    }
+                    else if (currentBlock == 26)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.LapisOre;
+                    }
+                    else if (currentBlock == 27)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.EmeraldOre;
+                    }
+                    else if (currentBlock == 28)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.DiamondOre;
+                    }
+                    else if (currentBlock == 29)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.CoalBlock;
+                    }
+                    else if (currentBlock == 30)
+                    {
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
+                        usedBlockEnum = Blocks.IronBlock;
+                    }
+                    else if (currentBlock == 31)
+                    {
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
+                        usedBlockEnum = Blocks.GoldBlock;
+                    }
+                    else if (currentBlock == 32)
+                    {
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
+                        usedBlockEnum = Blocks.RedstoneBlock;
+                    }
+                    else if (currentBlock == 33)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.LapisBlock;
+                    }
+                    else if (currentBlock == 34)
+                    {
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
+                        usedBlockEnum = Blocks.EmeraldBlock;
+                    }
+                    else if (currentBlock == 35)
+                    {
+                        SetSurfaceIndex(blockColliders, 80, 80, 80, 80, 80, 80, false, false);
+                        usedBlockEnum = Blocks.DiamondBlock;
+                    }
+                    else if (currentBlock == 36)
+                    {
+                        SetSurfaceIndex(blockColliders, 55, 55, 55, 55, 55, 55, false, false);
+                        usedBlockEnum = Blocks.Glass;
+                    }
+                    else if (currentBlock == 37)
+                    {
+                        SetSurfaceIndex(blockColliders, 55, 55, 55, 55, 55, 55, true, false);
+                        usedBlockEnum = Blocks.StainedGlass;
+                    }
+                    else if (currentBlock == 38)
+                    {
+                        SetSurfaceIndex(blockColliders, 3, 3, 3, 3, 3, 3, true, false);
+                        usedBlockEnum = Blocks.Wool;
+                    }
+                    else if (currentBlock == 39)
+                    {
+                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
+                        usedBlockEnum = Blocks.Bookshelf;
+                    }
+                    else if (currentBlock == 40)
+                    {
+                        SetSurfaceIndex(blockColliders, 9, 9, 9, 9, 9, 9, false, false);
+                        usedBlockEnum = Blocks.CraftingTable;
+                    }
+                    else if (currentBlock == 41)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.Furnace;
+                    }
+                    else if (currentBlock == 42)
+                    {
+                        SetSurfaceIndex(blockColliders, 59, 59, 59, 59, 59, 59, false, true);
+                        usedBlockEnum = Blocks.RegularIce;
+                    }
+                    else if (currentBlock == 43)
+                    {
+                        SetSurfaceIndex(blockColliders, 59, 59, 59, 59, 59, 59, false, true);
+                        usedBlockEnum = Blocks.PackedIce;
+                    }
+                    else if (currentBlock == 44)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+
+                        usedBlockEnum = Blocks.Netherrack;
+                    }
+                    else if (currentBlock == 45)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+
+                        usedBlockEnum = Blocks.SoulSand;
+                    }
+                    else if (currentBlock == 46)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+
+                        usedBlockEnum = Blocks.Obsidian;
+                    }
+                    else if (currentBlock == 47)
+                    {
+                        SetSurfaceIndex(blockColliders, 55, 55, 55, 55, 55, 55, false, false);
+                        usedBlockEnum = Blocks.Glowstone;
+                    }
+                    else if (currentBlock == 48)
+                    {
+                        SetSurfaceIndex(blockColliders, 82, 82, 82, 82, 82, 82, false, false);
+                        usedBlockEnum = Blocks.SlimeBlock;
+                        SetTrampoline(blockColliders);
+                    }
+                    else if (currentBlock == 49)
+                    {
+                        SetSurfaceIndex(blockColliders, 81, 81, 81, 81, 81, 81, false, false);
+                        usedBlockEnum = Blocks.Pumpkin;
+                    }
+                    else if (currentBlock == 50)
+                    {
+                        SetSurfaceIndex(blockColliders, 81, 81, 81, 81, 81, 81, false, false);
+                        usedBlockEnum = Blocks.Jackolantern;
+                    }
+                    else if (currentBlock == 51)
+                    {
+                        SetSurfaceIndex(blockColliders, 7, 7, 7, 7, 7, 7, false, false);
+                        usedBlockEnum = Blocks.Sponge;
+                    }
+                    else if (currentBlock == 52)
+                    {
+                        SetSurfaceIndex(blockColliders, 8, 8, 8, 8, 8, 8, false, false);
+                        usedBlockEnum = Blocks.Melon;
+                    }
+                    else if (currentBlock == 53)
+                    {
+                        SetSurfaceIndex(blockColliders, 7, 7, 7, 7, 7, 7, false, false);
+                        usedBlockEnum = Blocks.HayBale;
+                    }
+                    else if (currentBlock == 54)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.Bedrock;
+                    }
+                    else if (currentBlock == 55)
+                    {
+                        SetSurfaceIndex(blockColliders, 0, 0, 0, 0, 0, 0, false, false);
+                        usedBlockEnum = Blocks.Brick;
+                    }
+
+                    BoxCollider[] boxColliders = tempBlock.transform.GetComponentsInChildren<BoxCollider>();
+
+                    foreach (BoxCollider bx in boxColliders)
                     {
                         bx.enabled = true;
                         bx.gameObject.layer = 0;
@@ -532,7 +1261,9 @@ namespace DevMinecraftMod.Base
                         Color col = colours[ccm];
 
                         bl.blockIndex = currentBlock;
-                        if (dataUsed.HasCustomColour) bl.blockColour = col;
+
+                        if (currentBlock == 37 || currentBlock == 38)
+                            bl.blockColour = col;
 
                         bl.block = usedBlockEnum;
 
@@ -566,10 +1297,291 @@ namespace DevMinecraftMod.Base
             Transform blockColliders = tempBlock.transform.GetChild(0);
             blockColliders.GetComponent<BoxCollider>().enabled = false;
 
-            var dataUsed = blkToBD[blockIndex];
-            Blocks usedBlockEnum = dataUsed.CurBlock;
-            SetSurfaceIndexOther(blockColliders, dataUsed.SurData.front, dataUsed.SurData.left, dataUsed.SurData.right, dataUsed.SurData.back, dataUsed.SurData.up, dataUsed.SurData.down, dataUsed.HasCustomColour, Player.Instance.materialData[currentBlock].slidePercent >= 0.1f, blockColour);
-            if (dataUsed.IsBouncy) SetTrampoline(blockColliders);
+            Blocks usedBlockEnum = Blocks.Grass;
+
+            if (blockIndex == 0)
+            {
+                SetSurfaceIndexOther(blockColliders, 14, 14, 14, 14, 7, 14, false, false, blockColour);
+            }
+            else if (blockIndex == 1)
+            {
+                SetSurfaceIndexOther(blockColliders, 14, 14, 14, 14, 14, 14, false, false, blockColour);
+                usedBlockEnum = Blocks.Dirt;
+            }
+            else if (blockIndex == 2)
+            {
+                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.OakLog;
+            }
+            else if (blockIndex == 3)
+            {
+                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.SpruceLog;
+            }
+            else if (blockIndex == 4)
+            {
+                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.BirchLog;
+            }
+            else if (blockIndex == 5)
+            {
+                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.JungleLog;
+            }
+            else if (blockIndex == 6)
+            {
+                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.AcaciaLog;
+            }
+            else if (blockIndex == 7)
+            {
+                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.DarkOakLog;
+            }
+            else if (blockIndex == 8)
+            {
+                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.OakPlanks;
+            }
+            else if (blockIndex == 9)
+            {
+                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.SprucePlanks;
+            }
+            else if (blockIndex == 10)
+            {
+                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.BirchPlanks;
+            }
+            else if (blockIndex == 11)
+            {
+                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.JunglePlanks;
+            }
+            else if (blockIndex == 12)
+            {
+                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.AcaciaPlanks;
+            }
+            else if (blockIndex == 13)
+            {
+                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.DarkOakPlanks;
+            }
+            else if (blockIndex == 14)
+            {
+                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
+                usedBlockEnum = Blocks.OakLeaves;
+            }
+            else if (blockIndex == 15)
+            {
+                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
+                usedBlockEnum = Blocks.SpruceLeaves;
+            }
+            else if (blockIndex == 16)
+            {
+                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
+                usedBlockEnum = Blocks.BirchLeaves;
+            }
+            else if (blockIndex == 17)
+            {
+                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
+                usedBlockEnum = Blocks.JungleLeaves;
+            }
+            else if (blockIndex == 18)
+            {
+                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
+                usedBlockEnum = Blocks.AcaciaLeaves;
+            }
+            else if (blockIndex == 19)
+            {
+                SetSurfaceIndexOther(blockColliders, 31, 31, 31, 31, 31, 31, false, false, blockColour);
+                usedBlockEnum = Blocks.DarkOakLeaves;
+            }
+            else if (blockIndex == 20)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.Cobblestone;
+            }
+            else if (blockIndex == 21)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.Stone;
+            }
+            else if (blockIndex == 22)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.CoalOre;
+            }
+            else if (blockIndex == 23)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.IronOre;
+            }
+            else if (blockIndex == 24)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.GoldOre;
+            }
+            else if (blockIndex == 25)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.RedstoneOre;
+            }
+            else if (blockIndex == 26)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.LapisOre;
+            }
+            else if (blockIndex == 27)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.EmeraldOre;
+            }
+            else if (blockIndex == 28)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.DiamondOre;
+            }
+            else if (blockIndex == 29)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.CoalBlock;
+            }
+            else if (blockIndex == 30)
+            {
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
+                usedBlockEnum = Blocks.IronBlock;
+            }
+            else if (blockIndex == 31)
+            {
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
+                usedBlockEnum = Blocks.GoldBlock;
+            }
+            else if (blockIndex == 32)
+            {
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
+                usedBlockEnum = Blocks.RedstoneBlock;
+            }
+            else if (blockIndex == 33)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.LapisBlock;
+            }
+            else if (blockIndex == 34)
+            {
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
+                usedBlockEnum = Blocks.EmeraldBlock;
+            }
+            else if (blockIndex == 35)
+            {
+                SetSurfaceIndexOther(blockColliders, 80, 80, 80, 80, 80, 80, false, false, blockColour);
+                usedBlockEnum = Blocks.DiamondBlock;
+            }
+            else if (blockIndex == 36)
+            {
+                SetSurfaceIndexOther(blockColliders, 55, 55, 55, 55, 55, 55, false, false, blockColour);
+                usedBlockEnum = Blocks.Glass;
+            }
+            else if (blockIndex == 37)
+            {
+                SetSurfaceIndexOther(blockColliders, 55, 55, 55, 55, 55, 55, true, false, blockColour);
+                usedBlockEnum = Blocks.StainedGlass;
+            }
+            else if (blockIndex == 38)
+            {
+                SetSurfaceIndexOther(blockColliders, 3, 3, 3, 3, 3, 3, true, false, blockColour);
+                usedBlockEnum = Blocks.Wool;
+            }
+            else if (blockIndex == 39)
+            {
+                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.Bookshelf;
+            }
+            else if (blockIndex == 40)
+            {
+                SetSurfaceIndexOther(blockColliders, 9, 9, 9, 9, 9, 9, false, false, blockColour);
+                usedBlockEnum = Blocks.CraftingTable;
+            }
+            else if (blockIndex == 41)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.Furnace;
+            }
+            else if (blockIndex == 42)
+            {
+                SetSurfaceIndexOther(blockColliders, 59, 59, 59, 59, 59, 59, false, true, blockColour);
+                usedBlockEnum = Blocks.RegularIce;
+            }
+            else if (blockIndex == 43)
+            {
+                SetSurfaceIndexOther(blockColliders, 59, 59, 59, 59, 59, 59, false, true, blockColour);
+                usedBlockEnum = Blocks.PackedIce;
+            }
+            else if (blockIndex == 44)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+
+                usedBlockEnum = Blocks.Netherrack;
+            }
+            else if (blockIndex == 45)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+
+                usedBlockEnum = Blocks.SoulSand;
+            }
+            else if (blockIndex == 46)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+
+                usedBlockEnum = Blocks.Obsidian;
+            }
+            else if (blockIndex == 47)
+            {
+                SetSurfaceIndexOther(blockColliders, 55, 55, 55, 55, 55, 55, false, false, blockColour);
+                usedBlockEnum = Blocks.Glowstone;
+            }
+            else if (blockIndex == 48)
+            {
+                SetSurfaceIndexOther(blockColliders, 82, 82, 82, 82, 82, 82, false, false, blockColour);
+                usedBlockEnum = Blocks.SlimeBlock;
+                SetTrampoline(blockColliders);
+            }
+            else if (blockIndex == 49)
+            {
+                SetSurfaceIndexOther(blockColliders, 81, 81, 81, 81, 81, 81, false, false, blockColour);
+                usedBlockEnum = Blocks.Pumpkin;
+            }
+            else if (blockIndex == 50)
+            {
+                SetSurfaceIndexOther(blockColliders, 81, 81, 81, 81, 81, 81, false, false, blockColour);
+                usedBlockEnum = Blocks.Jackolantern;
+            }
+            else if (blockIndex == 51)
+            {
+                SetSurfaceIndexOther(blockColliders, 7, 7, 7, 7, 7, 7, false, false, blockColour);
+                usedBlockEnum = Blocks.Sponge;
+            }
+            else if (blockIndex == 52)
+            {
+                SetSurfaceIndexOther(blockColliders, 8, 8, 8, 8, 8, 8, false, false, blockColour);
+                usedBlockEnum = Blocks.Melon;
+            }
+            else if (blockIndex == 53)
+            {
+                SetSurfaceIndexOther(blockColliders, 7, 7, 7, 7, 7, 7, false, false, blockColour);
+                usedBlockEnum = Blocks.HayBale;
+            }
+            else if (blockIndex == 54)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.Bedrock;
+            }
+            else if (blockIndex == 55)
+            {
+                SetSurfaceIndexOther(blockColliders, 0, 0, 0, 0, 0, 0, false, false, blockColour);
+                usedBlockEnum = Blocks.Brick;
+            }
 
             BoxCollider[] boxColliders = tempBlock.transform.GetComponentsInChildren<BoxCollider>();
 
@@ -585,7 +1597,10 @@ namespace DevMinecraftMod.Base
                 bl.blockColour = Color.white;
                 bl.blockIndex = blockIndex;
 
-                if (dataUsed.HasCustomColour) bl.blockColour = blockColour;
+                if (blockIndex == 37 || blockIndex == 38)
+                {
+                    bl.blockColour = blockColour;
+                }
 
                 bl.block = usedBlockEnum;
 
@@ -634,13 +1649,12 @@ namespace DevMinecraftMod.Base
 
         #region Start/Update Functions
 
-        void Start()
+        async void Start()
         {
             Instance = this;
 
-            blockBundle = AssetBundle.LoadFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("DevMinecraftMod.Resources.devminecraft"));
-            blockBundleAlt = AssetBundle.LoadFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("DevMinecraftMod.Resources.devminecraftblock"));
-            AssetBundle extraBundle = AssetBundle.LoadFromStream(Assembly.GetExecutingAssembly().GetManifestResourceStream("DevMinecraftMod.Resources.extrablockresource"));
+            await LoadBundle(false, "DevMinecraftMod.Resources.devminecraft");
+            await LoadBundle(true, "DevMinecraftMod.Resources.devminecraftblock");
 
             if (harmony == null)
             {
@@ -648,88 +1662,84 @@ namespace DevMinecraftMod.Base
                 harmony.PatchAll();
             }
 
-            objectStorage = new GameObject();
+            await AddBlocks(MainResourceBundle, "Grass");
+            await AddBlocks(MainResourceBundle, "Dirt");
+            await AddBlocks(MainResourceBundle, "Log");
+            await AddBlocks(AltResourceBundle, "LogSpruce");
+            await AddBlocks(AltResourceBundle, "LogBirch");
+            await AddBlocks(AltResourceBundle, "LogJungle");
+            await AddBlocks(AltResourceBundle, "LogAcacia");
+            await AddBlocks(AltResourceBundle, "LogDark");
+            await AddBlocks(MainResourceBundle, "Plank");
+            await AddBlocks(AltResourceBundle, "PlankSpruce");
+            await AddBlocks(AltResourceBundle, "PlankBirch");
+            await AddBlocks(AltResourceBundle, "PlankJungle");
+            await AddBlocks(AltResourceBundle, "PlankAcacia");
+            await AddBlocks(AltResourceBundle, "PlankDark");
+            await AddBlocks(MainResourceBundle, "Leaves");
+            await AddBlocks(AltResourceBundle, "LeavesSpruce");
+            await AddBlocks(AltResourceBundle, "LeavesBirch");
+            await AddBlocks(AltResourceBundle, "LeavesJungle");
+            await AddBlocks(AltResourceBundle, "LeavesAcacia");
+            await AddBlocks(AltResourceBundle, "LeavesDark");
+            await AddBlocks(MainResourceBundle, "Cobblestone");
+            await AddBlocks(MainResourceBundle, "Stone");
+            await AddBlocks(AltResourceBundle, "CoalOre");
+            await AddBlocks(MainResourceBundle, "IronOre");
+            await AddBlocks(MainResourceBundle, "GoldOre");
+            await AddBlocks(AltResourceBundle, "RedstoneOre");
+            await AddBlocks(AltResourceBundle, "LapisOre");
+            await AddBlocks(AltResourceBundle, "EmeraldOre");
+            await AddBlocks(AltResourceBundle, "DiamondOre");
+            await AddBlocks(AltResourceBundle, "CoalBlock");
+            await AddBlocks(AltResourceBundle, "IronBlock");
+            await AddBlocks(AltResourceBundle, "GoldBlock");
+            await AddBlocks(AltResourceBundle, "RedstoneBlock");
+            await AddBlocks(AltResourceBundle, "LapisBlock");
+            await AddBlocks(AltResourceBundle, "EmeraldBlock");
+            await AddBlocks(AltResourceBundle, "DiamondBlock");
+            await AddBlocks(MainResourceBundle, "Glass");
+            await AddBlocks(MainResourceBundle, "StainGlass");
+            await AddBlocks(MainResourceBundle, "Wool");
+            await AddBlocks(MainResourceBundle, "Bookshelf");
+            await AddBlocks(MainResourceBundle, "CraftingTable");
+            await AddBlocks(MainResourceBundle, "Furnace");
+            await AddBlocks(AltResourceBundle, "RegularIce");
+            await AddBlocks(MainResourceBundle, "PackedIce");
+            await AddBlocks(MainResourceBundle, "Netherrack");
+            await AddBlocks(AltResourceBundle, "SoulSand");
+            await AddBlocks(MainResourceBundle, "Obisdian");
+            await AddBlocks(AltResourceBundle, "Glowstone");
+            await AddBlocks(AltResourceBundle, "SlimeBlock");
+            await AddBlocks(AltResourceBundle, "Pumpkin");
+            await AddBlocks(AltResourceBundle, "PumpkinOn");
+            await AddBlocks(AltResourceBundle, "Sponge");
+            await AddBlocks(AltResourceBundle, "Melon");
+            await AddBlocks(AltResourceBundle, "Hay");
+            await AddBlocks(AltResourceBundle, "Bedrock");
+            await AddBlocks(MainResourceBundle, "Brick");
+
+            objectStorage = new GameObject("DevMinecraftModStorage");
+            objectStorage.transform.SetParent(GameObject.Find("Level").transform, true);
             objectStorage.transform.position = Vector3.zero;
             objectStorage.transform.rotation = Quaternion.identity;
             objectStorage.transform.localScale = Vector3.one;
-            objectStorage.name = "DevMinecraftModStorage";
 
-            AddBlocks(blockBundle, "Grass");
-            AddBlocks(extraBundle, "Dirt");
-            AddBlocks(extraBundle, "OakLog");
-            AddBlocks(blockBundleAlt, "LogSpruce");
-            AddBlocks(blockBundleAlt, "LogBirch");
-            AddBlocks(blockBundleAlt, "LogJungle");
-            AddBlocks(blockBundleAlt, "LogAcacia");
-            AddBlocks(blockBundleAlt, "LogDark");
-            AddBlocks(blockBundle, "Plank");
-            AddBlocks(blockBundleAlt, "PlankSpruce");
-            AddBlocks(blockBundleAlt, "PlankBirch");
-            AddBlocks(blockBundleAlt, "PlankJungle");
-            AddBlocks(blockBundleAlt, "PlankAcacia");
-            AddBlocks(blockBundleAlt, "PlankDark");
-            AddBlocks(blockBundle, "Leaves");
-            AddBlocks(blockBundleAlt, "LeavesSpruce");
-            AddBlocks(blockBundleAlt, "LeavesBirch");
-            AddBlocks(blockBundleAlt, "LeavesJungle");
-            AddBlocks(blockBundleAlt, "LeavesAcacia");
-            AddBlocks(blockBundleAlt, "LeavesDark");
-            AddBlocks(blockBundle, "Cobblestone");
-            AddBlocks(blockBundle, "Stone");
-            AddBlocks(blockBundleAlt, "CoalOre");
-            AddBlocks(blockBundle, "IronOre");
-            AddBlocks(blockBundle, "GoldOre");
-            AddBlocks(blockBundleAlt, "RedstoneOre");
-            AddBlocks(blockBundleAlt, "LapisOre");
-            AddBlocks(blockBundleAlt, "EmeraldOre");
-            AddBlocks(blockBundleAlt, "DiamondOre");
-            AddBlocks(blockBundleAlt, "CoalBlock");
-            AddBlocks(blockBundleAlt, "IronBlock");
-            AddBlocks(blockBundleAlt, "GoldBlock");
-            AddBlocks(blockBundleAlt, "RedstoneBlock");
-            AddBlocks(blockBundleAlt, "LapisBlock");
-            AddBlocks(blockBundleAlt, "EmeraldBlock");
-            AddBlocks(blockBundleAlt, "DiamondBlock");
-            AddBlocks(blockBundle, "Glass");
-            AddBlocks(blockBundle, "StainGlass");
-            AddBlocks(blockBundle, "Wool");
-            AddBlocks(blockBundle, "Bookshelf");
-            AddBlocks(blockBundle, "CraftingTable");
-            AddBlocks(blockBundle, "Furnace");
-            AddBlocks(blockBundleAlt, "RegularIce");
-            AddBlocks(blockBundle, "PackedIce");
-            AddBlocks(blockBundle, "Netherrack");
-            AddBlocks(blockBundleAlt, "SoulSand");
-            AddBlocks(blockBundle, "Obisdian");
-            AddBlocks(blockBundleAlt, "Glowstone");
-            AddBlocks(blockBundleAlt, "SlimeBlock");
-            AddBlocks(blockBundleAlt, "Pumpkin");
-            AddBlocks(blockBundleAlt, "PumpkinOn");
-            AddBlocks(blockBundleAlt, "Sponge");
-            AddBlocks(blockBundleAlt, "Melon");
-            AddBlocks(blockBundleAlt, "Hay");
-            AddBlocks(blockBundleAlt, "Bedrock");
-            AddBlocks(blockBundle, "Brick");
-
-            // ADDING BLOCKS
-            // fire the "AddBlocks" function with the block name and assetbundle, add the blocks particles, surface index, and sounds
-
-            objectStorageBlock = new GameObject();
+            objectStorageBlock = new GameObject("Blocks");
+            objectStorageBlock.transform.SetParent(objectStorage.transform, true);
             objectStorageBlock.transform.position = Vector3.zero;
             objectStorageBlock.transform.rotation = Quaternion.identity;
             objectStorageBlock.transform.localScale = Vector3.one;
-            objectStorageBlock.name = "Blocks";
-            objectStorageBlock.transform.SetParent(objectStorage.transform, false);
 
-            block = Instantiate(blockBundle.LoadAsset<GameObject>("BlockIndicator"));
+            block = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("BlockIndicator"));
             block.transform.localScale = Vector3.one * 1.015f;
             block.transform.SetParent(objectStorage.transform, false);
 
-            blockAlt = Instantiate(blockBundle.LoadAsset<GameObject>("BlockIndicatorRed"));
+            blockAlt = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("BlockIndicatorRed"));
             blockAlt.transform.localScale = Vector3.one * 1.015f;
             blockAlt.transform.SetParent(objectStorage.transform, false);
 
-            clip = blockBundle.LoadAsset<AudioClip>("clicknew");
+            clip = await MainResourceBundle.LoadDevAsset<AudioClip>("clicknew");
 
             BoxCollider[] boxColliders = block.transform.GetComponentsInChildren<BoxCollider>();
 
@@ -748,7 +1758,7 @@ namespace DevMinecraftMod.Base
             }
 
             Transform palm = GorillaTagger.Instance.offlineVRRig.leftHandTransform.parent.Find("palm.01.L");
-            itemIndicator = Instantiate(blockBundle.LoadAsset<GameObject>("ItemSelector"));
+            itemIndicator = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("ItemSelector"));
 
             itemIndicator.transform.SetParent(palm, false);
             itemIndicator.transform.localPosition = Vector3.zero;
@@ -767,7 +1777,7 @@ namespace DevMinecraftMod.Base
 
             itemShow.SetActive(false);
 
-            itemPickaxe = Instantiate(blockBundle.LoadAsset<GameObject>("DiamondPickaxe"));
+            itemPickaxe = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("DiamondPickaxe"));
             itemPickaxe.transform.SetParent(palm2, false);
             itemPickaxe.transform.localPosition = new Vector3(-0.017f, 0.051f, -0.066f);
             itemPickaxe.transform.localRotation = Quaternion.Euler(55.561f, -11.768f, -279.547f);
@@ -787,27 +1797,27 @@ namespace DevMinecraftMod.Base
 
             SetLoadSave();
 
-            GameObject lnObject = Instantiate(blockBundle.LoadAsset<GameObject>("lineRendererExample"));
+            GameObject lnObject = Instantiate(await MainResourceBundle.LoadDevAsset<GameObject>("lineRendererExample"));
+            lnObject.transform.SetParent(objectStorage.transform, true);
             lnObject.transform.position = Vector3.zero;
             lnObject.transform.rotation = Quaternion.identity;
             lnObject.transform.localScale = Vector3.one;
 
             ln = lnObject.GetComponent<LineRenderer>();
             ln.enabled = false;
+
+            Initalized = true;
         }
 
-        void FixedUpdate()
+        private void Update()
         {
             if (Time.time >= cooldownTime)
             {
                 if (triggerPullled)
                     triggerPullled = false;
             }
-        }
 
-        void LateUpdate()
-        {
-            if (Instance == null || block == null || blockAlt == null || itemIndicator == null || minecraftBlockList.Count == 0 || itemPickaxe == null || itemShow == null || harmony == null)
+            if (Instance == null || block == null || blockAlt == null || itemIndicator == null || minecraftBlockList.Count == 0 || itemPickaxe == null || itemShow == null || harmony == null || !Initalized)
                 return;
 
             if (!PhotonNetwork.InRoom)
@@ -827,7 +1837,7 @@ namespace DevMinecraftMod.Base
                 return;
             }
 
-            if (!Plugin.Instance.InRoom)
+            if (!Plugin.Instance.GetRoomState())
             {
                 block.SetActive(false);
                 blockAlt.SetActive(false);
@@ -922,7 +1932,7 @@ namespace DevMinecraftMod.Base
             else
                 ln.material.color = new Color(1, 0, 0, 0.2f);
 
-            ln.SetPosition(0, Player.Instance.rightHandTransform.position);
+            ln.SetPosition(0, Player.Instance.rightControllerTransform.position);
 
             if (minecraftBlocks.Count != 0)
             {
@@ -932,7 +1942,7 @@ namespace DevMinecraftMod.Base
 
             Player __instance = Player.Instance;
 
-            if (Physics.Raycast(__instance.rightHandTransform.position, -__instance.rightHandTransform.up, out RaycastHit hit, 25, Player.Instance.locomotionEnabledLayers))
+            if (Physics.Raycast(__instance.rightControllerTransform.position, -__instance.rightControllerTransform.up, out RaycastHit hit, 25, Player.Instance.locomotionEnabledLayers))
             {
                 Vector3 newPos = hit.point;
 
@@ -953,15 +1963,15 @@ namespace DevMinecraftMod.Base
                 else
                 {
                     blockAlt.transform.eulerAngles = Vector3.zero;
-                    blockAlt.transform.position = new Vector3(((Mathf.RoundToInt(newPos.x) != 0) ? (Mathf.RoundToInt(newPos.x / 1f) * 1) : 2), ((Mathf.RoundToInt(newPos.y) != 0) ? (Mathf.RoundToInt(newPos.y / 1f) * 1) : 0), ((Mathf.RoundToInt(newPos.z) != 0) ? (Mathf.RoundToInt(newPos.z / 1f) * 1) : 2));
+                    blockAlt.transform.position = new Vector3(Mathf.RoundToInt(newPos.x) != 0 ? Mathf.RoundToInt(newPos.x / 1f) * 1 : 2, Mathf.RoundToInt(newPos.y) != 0 ? Mathf.RoundToInt(newPos.y / 1f) * 1 : 0, Mathf.RoundToInt(newPos.z) != 0 ? Mathf.RoundToInt(newPos.z / 1f) * 1 : 2);
                 }
 
-                block.transform.position = new Vector3(((Mathf.RoundToInt(newPos.x) != 0) ? (Mathf.RoundToInt(newPos.x / 1f) * 1) : 2), ((Mathf.RoundToInt(newPos.y) != 0) ? (Mathf.RoundToInt(newPos.y / 1f) * 1) : 0), ((Mathf.RoundToInt(newPos.z) != 0) ? (Mathf.RoundToInt(newPos.z / 1f) * 1) : 2));
+                block.transform.position = new Vector3(Mathf.RoundToInt(newPos.x) != 0 ? Mathf.RoundToInt(newPos.x / 1f) * 1 : 2, Mathf.RoundToInt(newPos.y) != 0 ? Mathf.RoundToInt(newPos.y / 1f) * 1 : 0, Mathf.RoundToInt(newPos.z) != 0 ? Mathf.RoundToInt(newPos.z / 1f) * 1 : 2);
 
                 if (currentBlock == 40 || currentBlock == 41 || currentBlock == 49 || currentBlock == 50)
-                    block.transform.eulerAngles = new Vector3(0, ((Mathf.RoundToInt(Player.Instance.bodyCollider.transform.eulerAngles.y) != 0) ? (Mathf.RoundToInt(Player.Instance.bodyCollider.transform.eulerAngles.y / 90f) * 90) : 0), 0f);
+                    block.transform.eulerAngles = new Vector3(0, Mathf.RoundToInt(Player.Instance.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.Instance.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f);
                 else if (currentBlock == 2 || currentBlock == 3 || currentBlock == 4 || currentBlock == 5 || currentBlock == 6 || currentBlock == 7)
-                    block.transform.eulerAngles = new Vector3(((Mathf.RoundToInt(Player.Instance.rightHandTransform.transform.eulerAngles.x) != 0) ? (Mathf.RoundToInt(Player.Instance.rightHandTransform.transform.eulerAngles.x / 90f) * 90) : 0), ((Mathf.RoundToInt(Player.Instance.bodyCollider.transform.eulerAngles.y) != 0) ? (Mathf.RoundToInt(Player.Instance.bodyCollider.transform.eulerAngles.y / 90f) * 90) : 0), 0f);
+                    block.transform.eulerAngles = new Vector3(Mathf.RoundToInt(Player.Instance.rightControllerTransform.transform.eulerAngles.x) != 0 ? Mathf.RoundToInt(Player.Instance.rightControllerTransform.transform.eulerAngles.x / 90f) * 90 : 0, Mathf.RoundToInt(Player.Instance.bodyCollider.transform.eulerAngles.y) != 0 ? Mathf.RoundToInt(Player.Instance.bodyCollider.transform.eulerAngles.y / 90f) * 90 : 0, 0f);
                 else
                     block.transform.eulerAngles = Vector3.zero;
             }
@@ -970,7 +1980,7 @@ namespace DevMinecraftMod.Base
                 raycastExists = false;
 
                 ln.enabled = false;
-                ln.SetPosition(1, Player.Instance.rightHandTransform.position);
+                ln.SetPosition(1, Player.Instance.rightControllerTransform.position);
                 block.SetActive(false);
                 blockAlt.SetActive(false);
             }
@@ -1084,80 +2094,71 @@ namespace DevMinecraftMod.Base
             yield break;
         }
 
-        void AddBlocks(AssetBundle bundle, string blockName)
+        private async Task AddBlocks(AssetBundle bundle, string blockName)
         {
-            try
-            {
-                GameObject objec = Instantiate(bundle.LoadAsset<GameObject>(blockName));
-                minecraftBlockList.Add(objec);
-                objec.transform.SetParent(objectStorage.transform);
-                objec.transform.localPosition = Vector3.zero;
+            GameObject objec = await bundle.LoadDevAsset<GameObject>(blockName);
+            minecraftBlockList.Add(objec);
 
-                string blockNameFinal = blockName
+            string blockNameFinal = blockName
 
-                    .Replace("CraftingTable", "Crafting Table")
+                .Replace("CraftingTable", "Crafting Table")
 
-                    .Replace("IronOre", "Iron Ore")
-                    .Replace("GoldOre", "Gold Ore")
+                .Replace("IronOre", "Iron Ore")
+                .Replace("GoldOre", "Gold Ore")
 
-                    .Replace("PackedIce", "Packed Ice")
+                .Replace("PackedIce", "Packed Ice")
 
-                    .Replace("Plank", "Oak Planks")
+                .Replace("Plank", "Oak Planks")
 
-                    .Replace("Log", "Oak Log")
+                .Replace("Log", "Oak Log")
 
-                    .Replace("Obisdian", "Obsidian")
+                .Replace("Obisdian", "Obsidian")
 
-                    .Replace("Leaves", "Oak Leaves")
+                .Replace("Leaves", "Oak Leaves")
 
-                    .Replace("Brick", "Bricks")
+                .Replace("Brick", "Bricks")
 
-                    .Replace("Oak LogSpruce", "Spruce Log")
-                    .Replace("Oak LogBirch", "Birch Log")
-                    .Replace("Oak LogJungle", "Jungle Log")
-                    .Replace("Oak LogAcacia", "Acacia Log")
-                    .Replace("Oak LogDark", "Dark Oak Log")
+                .Replace("Oak LogSpruce", "Spruce Log")
+                .Replace("Oak LogBirch", "Birch Log")
+                .Replace("Oak LogJungle", "Jungle Log")
+                .Replace("Oak LogAcacia", "Acacia Log")
+                .Replace("Oak LogDark", "Dark Oak Log")
 
-                    .Replace("Oak PlanksSpruce", "Spruce Planks")
-                    .Replace("Oak PlanksBirch", "Birch Planks")
-                    .Replace("Oak PlanksJungle", "Jungle Planks")
-                    .Replace("Oak PlanksAcacia", "Acacia Planks")
-                    .Replace("Oak PlanksDark", "Dark Oak Planks")
-                    .Replace("Oak LeavesSpruce", "Spruce Leaves")
-                    .Replace("Oak LeavesBirch", "Birch Leaves")
-                    .Replace("Oak LeavesJungle", "Jungle Leaves")
-                    .Replace("Oak LeavesAcacia", "Acacia Leaves")
-                    .Replace("Oak LeavesDark", "Dark Oak Leaves")
+                .Replace("Oak PlanksSpruce", "Spruce Planks")
+                .Replace("Oak PlanksBirch", "Birch Planks")
+                .Replace("Oak PlanksJungle", "Jungle Planks")
+                .Replace("Oak PlanksAcacia", "Acacia Planks")
+                .Replace("Oak PlanksDark", "Dark Oak Planks")
+                .Replace("Oak LeavesSpruce", "Spruce Leaves")
+                .Replace("Oak LeavesBirch", "Birch Leaves")
+                .Replace("Oak LeavesJungle", "Jungle Leaves")
+                .Replace("Oak LeavesAcacia", "Acacia Leaves")
+                .Replace("Oak LeavesDark", "Dark Oak Leaves")
 
-                    .Replace("CoalOre", "Coal Ore")
-                    .Replace("IronOre", "Iron Ore")
-                    .Replace("GoldOre", "Gold Ore")
-                    .Replace("RedstoneOre", "Redstone Ore")
-                    .Replace("LapisOre", "Lapis Lazuli Ore")
-                    .Replace("EmeraldOre", "Emerald Ore")
-                    .Replace("DiamondOre", "Diamond Ore")
+                .Replace("CoalOre", "Coal Ore")
+                .Replace("IronOre", "Iron Ore")
+                .Replace("GoldOre", "Gold Ore")
+                .Replace("RedstoneOre", "Redstone Ore")
+                .Replace("LapisOre", "Lapis Lazuli Ore")
+                .Replace("EmeraldOre", "Emerald Ore")
+                .Replace("DiamondOre", "Diamond Ore")
 
-                    .Replace("CoalBlock", "Block of Coal")
-                    .Replace("IronBlock", "Block of Iron")
-                    .Replace("GoldBlock", "Block of Gold")
-                    .Replace("RedstoneBlock", "Block of Redstone")
-                    .Replace("LapisBlock", "Lapis Lazuli Block")
-                    .Replace("EmeraldBlock", "Block of Emerald")
-                    .Replace("DiamondBlock", "Block of Diamomd")
+                .Replace("CoalBlock", "Block of Coal")
+                .Replace("IronBlock", "Block of Iron")
+                .Replace("GoldBlock", "Block of Gold")
+                .Replace("RedstoneBlock", "Block of Redstone")
+                .Replace("LapisBlock", "Lapis Lazuli Block")
+                .Replace("EmeraldBlock", "Block of Emerald")
+                .Replace("DiamondBlock", "Block of Diamomd")
 
-                    .Replace("StainGlass", "Stained Glass")
-                    .Replace("RegularIce", "Ice")
-                    .Replace("SoulSand", "Soul Sand")
+                .Replace("StainGlass", "Stained Glass")
+                .Replace("RegularIce", "Ice")
+                .Replace("SoulSand", "Soul Sand")
 
-                    .Replace("SlimeBlock", "Slime Block")
-                    .Replace("PumpkinOn", "Jack o'Lantern");
+                .Replace("SlimeBlock", "Slime Block")
+                .Replace("PumpkinOn", "Jack o'Lantern");
 
-                minecraftBlockListString.Add(blockNameFinal);
-            }
-            catch
-            {
-                Console.WriteLine("issue with " + blockName);
-            }
+            minecraftBlockListString.Add(blockNameFinal);
         }
 
         public void SetSlot(int slot)
@@ -1316,5 +2317,55 @@ namespace DevMinecraftMod.Base
 
         #endregion
 
+        #region Asset Loading
+
+        /// <summary>
+        /// Loads in the main AssetBundle used for loading other assets in that bundle
+        /// </summary>
+        /// <returns></returns>
+        public async Task LoadBundle(bool isAlt, string bundlePath)
+        {
+            var taskCompletionSource = new TaskCompletionSource<AssetBundle>();
+            var request = AssetBundle.LoadFromStreamAsync(Assembly.GetExecutingAssembly().GetManifestResourceStream(bundlePath));
+            request.completed += operation =>
+            {
+                var outRequest = operation as AssetBundleCreateRequest;
+                taskCompletionSource.SetResult(outRequest.assetBundle);
+            };
+
+            if (isAlt)
+            {
+                AltResourceBundle = await taskCompletionSource.Task;
+                return;
+            }
+            MainResourceBundle = await taskCompletionSource.Task;
+        }
+
+        /// <summary>
+        /// Loads in an asset from the main AssetBundle
+        /// </summary>
+        /// <typeparam name="T">The type of asset which is being loaded</typeparam>
+        /// <param name="assetName">The name of the asset</param>
+        /// <returns></returns>
+        public async Task<T> LoadAsset<T>(string assetName, AssetBundle loadingBundle) where T : Object
+        {
+            var taskCompletionSource = new TaskCompletionSource<T>();
+            var request = loadingBundle.LoadAssetAsync<T>(assetName);
+            request.completed += operation =>
+            {
+                var outRequest = operation as AssetBundleRequest;
+                if (outRequest.asset == null)
+                {
+                    taskCompletionSource.SetResult(null);
+                    return;
+                }
+
+                taskCompletionSource.SetResult(outRequest.asset as T);
+            };
+
+            return await taskCompletionSource.Task;
+        }
+
+        #endregion
     }
 }

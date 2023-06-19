@@ -1,7 +1,7 @@
-﻿using Photon.Pun;
+﻿using DevMinecraftMod.Scripts.Building;
 using UnityEngine;
 
-namespace DevMinecraftMod.Base
+namespace DevMinecraftMod.Scripts.Utils
 {
     public class ButtonMain : MonoBehaviour
     {
