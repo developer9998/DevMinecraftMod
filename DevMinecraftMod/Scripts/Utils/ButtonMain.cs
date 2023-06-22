@@ -24,9 +24,9 @@ namespace DevMinecraftMod.Scripts.Utils
                 return;
             }
 
-            if (GorillaTagger.Instance.myVRRig != null)
+            if(GorillaParent.instance.vrrigDict.TryGetValue(Photon.Pun.PhotonNetwork.LocalPlayer, out VRRig player))
             {
-                if (!GorillaTagger.Instance.myVRRig.mainSkin.enabled)
+                if (!player.mainSkin.enabled)
                 {
                     return;
                 }
