@@ -22,13 +22,8 @@ namespace DevMinecraftMod.Scripts.Utils
                 return;
             }
 
-            if(GorillaParent.instance.vrrigDict.TryGetValue(Photon.Pun.PhotonNetwork.LocalPlayer, out VRRig player))
-            {
-                if (!player.mainSkin.enabled)
-                {
-                    return;
-                }
-            }
+            if (GorillaLocomotion.Player.Instance.inOverlay)
+                return;
 
             touchTime = Time.time;
 
