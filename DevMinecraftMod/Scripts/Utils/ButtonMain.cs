@@ -15,6 +15,7 @@ namespace DevMinecraftMod.Scripts.Utils
         void Start()
         {
             gameObject.layer = 18;
+            GetComponent<BoxCollider>().size *= 1.4f;
         }
 
         private void OnTriggerEnter(Collider collider)
